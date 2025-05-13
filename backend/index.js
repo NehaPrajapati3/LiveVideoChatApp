@@ -23,7 +23,7 @@ const server = http.createServer(app);
 const io = new Server(server, {
   cors: {
     // origin: "http://localhost:3000",
-    origin: "*",
+    origin: process.env.CLIENT_ORIGIN,
     methods: ["GET", "POST"],
     credentials: true,
   },
@@ -44,7 +44,7 @@ app.use(cookieParser());
 // };
 
 const corsOption = {
-  origin: "*",
+  origin: process.env.CLIENT_ORIGIN,
   credentials: true,
 };
 
@@ -58,14 +58,14 @@ app.use("/api/v1/auth", verifyRoute);
 app.use("/api/v1/user", userRoute);
 
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
-const clientBuildPath = path.resolve(__dirname, "../frontend/build");
-app.use(express.static(clientBuildPath));
+// const __filename = fileURLToPath(import.meta.url);
+// const __dirname = path.dirname(__filename);
+// const clientBuildPath = path.resolve(__dirname, "../frontend/build");
+// app.use(express.static(clientBuildPath));
 
-app.get("*", (req, res) => {
-  res.sendFile(path.resolve(clientBuildPath, "index.html"))
-});
+// app.get("*", (req, res) => {
+//   res.sendFile(path.resolve(clientBuildPath, "index.html"))
+// });
 
 server.listen(PORT, () => {
   connectDB();

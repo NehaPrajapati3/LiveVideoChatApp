@@ -126,5 +126,25 @@ export default function socketHandler(io) {
         delete socketToRoom[socket.id];
       });
     });
+
+    socket.on("leave-room", ({ roomId, userId }) => {
+      console.log(`🚪 User ${userId} manually left room ${roomId}`);
+
+      // Remove user from room
+      if (usersInRoom[roomId]) {
+        usersInRoom[roomId] = usersInRoom[roomId].filter(
+          (u) => u.socketId !== socket.id
+        );
+        socket.to(roomId).emit("user-left", socket.id);
+
+        if (usersInRoom[roomId].length === 0) {
+          delete usersInRoom[roomId];
+        }
+      }
+
+      delete socketToRoom[socket.id];
+      socket.leave(roomId);
+    });
+    
   });
 }
