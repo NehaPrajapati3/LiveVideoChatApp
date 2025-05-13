@@ -64,7 +64,7 @@ const clientBuildPath = path.resolve(__dirname, "../frontend/build");
 app.use(express.static(clientBuildPath));
 
 app.get("*", (req, res) => {
-  res.sendFile(path.resolve(clientBuildPath, "index.html"));
+  res.sendFile(path.resolve(clientBuildPath, "index.html"))
 });
 
 server.listen(PORT, () => {
