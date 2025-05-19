@@ -11,7 +11,7 @@ import { useSelector } from 'react-redux';
 function MainPanel() {
 
   useGetScheduledMeetings();
-  const meetings = useSelector((state) => state.meeting.meetings);
+  const meetings = useSelector((state) => state.meeting.meetings || []);
   console.log("meetings:", meetings);
 
     const [joinCode, setJoinCode] = useState("");
