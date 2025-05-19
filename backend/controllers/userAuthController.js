@@ -91,12 +91,14 @@ export const login = async (req, res) => {
       .cookie("token", token, {
         maxAge: 1 * 24 * 60 * 60 * 1000,
         httpOnly: true,
-        sameSite: "strict",
+        secure: true, 
+        sameSite: "None", 
       })
       .json({
-        status:true,
-        userData: user
+        status: true,
+        userData: user,
       });
+  
   } catch (error) {
     console.log(`Log in user error: ${error}`);
     return res.status(500).json({
