@@ -6,6 +6,7 @@ import http from "http";
 import connectDB from "./config/database.js";
 import verifyRoute from "./routes/verifyRoute.js";
 import userRoute from "./routes/userRoute.js";
+import meetingRoute from "./routes/meetingRoutes.js";
 import {Server} from "socket.io";
 import socketHandler from "./socket.js";
 import path from "path";
@@ -56,6 +57,7 @@ app.use("/uploads", express.static("uploads"));
 // Routes
 app.use("/api/v1/auth", verifyRoute);
 app.use("/api/v1/user", userRoute);
+app.use("/api/v1/meeting", meetingRoute);
 
 
 // const __filename = fileURLToPath(import.meta.url);

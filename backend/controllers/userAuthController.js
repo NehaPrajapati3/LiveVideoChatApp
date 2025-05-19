@@ -94,10 +94,12 @@ export const login = async (req, res) => {
         sameSite: "strict",
       })
       .json({
-        _id: user._id,
-        firstName: user.userInfo?.firstName,
-        lastName: user.userInfo?.lastName,
-        email: user.userAuth?.email,
+        userData: {
+          _id: user._id,
+          firstName: user.userInfo?.fullName,
+          lastName: user.userInfo?.username,
+          email: user.userAuth?.email,
+        },
       });
   } catch (error) {
     console.log(`Log in user error: ${error}`);
@@ -122,5 +124,17 @@ export const logout = (req, res) => {
       message: "Internal server error",
       success: false,
     });
+  }
+};
+
+export const getUsers = async (req, res) => {
+  try {
+    // const { hostId } = req.id;
+    // const meetings = await Meeting.find({ hostId });
+    const users = await UserAuth.find();
+    res.status(200).json(users);
+  } catch (error) {
+    console.error("Error fetching users:", error);
+    res.status(500).json({ message: "Failed to fetch users", error });
   }
 };

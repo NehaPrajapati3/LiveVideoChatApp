@@ -190,15 +190,25 @@ import {
   MessageSquare,
   MessageSquareDashed,
 } from "lucide-react";
+import { useLocation } from "react-router-dom";
+import { useEffect } from "react";
 
 export default function Room() {
+  const location = useLocation();
+  const payload = location.state;
+
+  useEffect(() => {
+    console.log("Received Payload:", payload);
+  }, [payload]);
+
+  
   const { userData } = useSelector((state) => state.auth);
   const userId = userData?._id;
   console.log("userId in room:", userId);
   const { roomId } = useParams();
   const navigate = useNavigate();
   const { localVideoRef, remoteStreams, localStream, leaveRoom } =
-    useMultiWebRTC(roomId, userId);
+    useMultiWebRTC(roomId, userId, navigate);
 
   const [focusedVideoId, setFocusedVideoId] = useState("local");
   const [micOn, setMicOn] = useState(true);
@@ -256,6 +266,8 @@ export default function Room() {
     navigate("/");
   };
 
+
+  
   return (
     <div>
       <div>
@@ -320,46 +332,48 @@ export default function Room() {
         </div>
 
         <div className="w-1/2">
-          <div className="flex flex-wrap w-full flex-row">
-            {focusedVideoId !== "local" && localStream && (
-              <div
-                className="p-2 w-1/2 cursor-pointer"
-                onClick={() => setFocusedVideoId("local")}
-              >
-                <p>You</p>
-                <video
-                  ref={(video) => assignStream(video, localStream)}
-                  muted
-                  autoPlay
-                  playsInline
-                  className="video"
-                />
-              </div>
-            )}
-
-            {remoteStreams.length === 0 && (
-              <p className="w-full text-center text-gray-400 mt-4">
-                Waiting for participants...
-              </p>
-            )}
-
-            {remoteStreams
-              .filter(({ peerID }) => peerID !== focusedVideoId)
-              .map(({ peerID, stream }) => (
+          <div className="flex-1 overflow-y-auto p-6">
+            <div className="flex flex-wrap w-full flex-row">
+              {focusedVideoId !== "local" && localStream && (
                 <div
-                  key={peerID}
-                  className="p-2 w-1/2 cursor-pointer"
-                  onClick={() => setFocusedVideoId(peerID)}
+                  className="p-2 w-1/4 cursor-pointer"
+                  onClick={() => setFocusedVideoId("local")}
                 >
-                  <p>Peer ID: {peerID}</p>
+                  <p>You</p>
                   <video
-                    ref={(video) => assignStream(video, stream)}
+                    ref={(video) => assignStream(video, localStream)}
+                    muted
                     autoPlay
                     playsInline
                     className="video"
                   />
                 </div>
-              ))}
+              )}
+
+              {remoteStreams.length === 0 && (
+                <p className="w-full text-center text-gray-400 mt-4">
+                  Waiting for participants...
+                </p>
+              )}
+
+              {remoteStreams
+                .filter(({ peerID }) => peerID !== focusedVideoId)
+                .map(({ peerID, stream }) => (
+                  <div
+                    key={peerID}
+                    className="p-2 w-1/4 cursor-pointer"
+                    onClick={() => setFocusedVideoId(peerID)}
+                  >
+                    <p>Peer ID: {peerID}</p>
+                    <video
+                      ref={(video) => assignStream(video, stream)}
+                      autoPlay
+                      playsInline
+                      className="video"
+                    />
+                  </div>
+                ))}
+            </div>
           </div>
         </div>
       </div>

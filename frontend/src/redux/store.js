@@ -1,5 +1,6 @@
 import { combineReducers, configureStore } from "@reduxjs/toolkit";
 import authReducer from "./authSlice";
+import meetingReducer from "./meetingSlice";
 import {
   persistReducer,
   FLUSH,
@@ -19,7 +20,7 @@ const persistConfig = {
 
 const rootReducer = combineReducers({
   auth: authReducer,
-  
+  meeting: meetingReducer,
 });
 
 const persistedReducer = persistReducer(persistConfig, rootReducer);

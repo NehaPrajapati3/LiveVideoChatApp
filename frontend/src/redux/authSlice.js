@@ -21,9 +21,15 @@ const authSlice = createSlice({
       state.status = action.payload.status;
       state.userData = action.payload.userData || null;
     },
+    setUsers: (state, action) => {
+      console.log("✅ Inside setUsers reducer!");
+      console.log("🚀 Payload received:", action.payload);
+      state.users = action.payload;
+      console.log("✅ Updated users:", state.users);
+    },
   },
 });
 
-export const { login, logout, setAuthStatus } = authSlice.actions;
+export const { login, logout, setAuthStatus, setUsers } = authSlice.actions;
 
 export default authSlice.reducer;

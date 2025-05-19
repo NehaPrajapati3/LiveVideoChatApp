@@ -1,50 +1,9 @@
-// class PeerService {
-//   constructor() {
-//     if (!this.peer) {
-//       this.peer = new RTCPeerConnection({
-//         iceServers: [
-//           {
-//             urls: [
-//               "stun:stun.l.google.com:19302",
-//               "stun:global.stun.twilio.com:3478",
-//             ],
-//           },
-//         ],
-//       });
-//     }
-//   }
-
-//   async getAnswer(offer) {
-//     if (this.peer) {
-//       await this.peer.setRemoteDescription(offer);
-//       const ans = await this.peer.createAnswer();
-//       await this.peer.setLocalDescription(new RTCSessionDescription(ans));
-//       return ans;
-//     }
-//   }
-
-//   async setLocalDescription(ans) {
-//     if (this.peer) {
-//       await this.peer.setRemoteDescription(new RTCSessionDescription(ans));
-//     }
-//   }
-
-//   async getOffer() {
-//     if (this.peer) {
-//       const offer = await this.peer.createOffer();
-//       await this.peer.setLocalDescription(new RTCSessionDescription(offer));
-//       return offer;
-//     }
-//   }
-// }
-
-// export default new PeerService();
 
 import { useEffect, useRef, useState } from "react";
 import { io } from "socket.io-client";
 import Peer from "simple-peer";
 
-export const useMultiWebRTC = (roomId, userId) => {
+export const useMultiWebRTC = (roomId, userId, navigate) => {
   console.log("iserId in peer.js:", userId);
   const [peers, setPeers] = useState([]);
   const [remoteStreams, setRemoteStreams] = useState([]);
@@ -55,6 +14,30 @@ export const useMultiWebRTC = (roomId, userId) => {
 
   useEffect(() => {
     socketRef.current = io(process.env.REACT_APP_API_URL);
+
+    socketRef.current.on("confirm-disconnect", ({ newSocketId, message }) => {
+      const confirmSwitch = window.confirm(
+        message || "Another login is trying to connect. Allow it?"
+      );
+      socketRef.current.emit("confirm-disconnect-response", {
+        accept: confirmSwitch,
+        newSocketId,
+      });
+    });
+
+    socketRef.current.on("force-disconnect", ({ message }) => {
+      alert(message || "Disconnected due to another session.");
+      socketRef.current.disconnect();
+
+      peersRef.current.forEach(({ peer }) => peer.destroy());
+      peersRef.current = [];
+      setPeers([]);
+      setRemoteStreams([]);
+
+      if(navigate){
+        navigate("/")
+      }
+    });
 
     navigator.mediaDevices
       .getUserMedia({ video: true, audio: true })

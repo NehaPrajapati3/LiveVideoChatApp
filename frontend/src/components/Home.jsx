@@ -64,56 +64,119 @@
 // export default LobbyScreen;
 
 
-import React, { useState } from "react";
-import { useNavigate } from "react-router-dom";
-import { v4 as uuidv4 } from "uuid";
+// import React, { useState } from "react";
+// import { useNavigate, Link } from "react-router-dom";
+// import { v4 as uuidv4 } from "uuid";
 
-const Lobby = () => {
-  const [roomId, setRoomId] = useState("");
-  const [displayName, setDisplayName] = useState("");
-  const navigate = useNavigate();
+// const Lobby = () => {
+//   const [roomId, setRoomId] = useState("");
+//   const [displayName, setDisplayName] = useState("");
+//   const navigate = useNavigate();
 
-  const handleJoin = () => {
-    if (!roomId.trim()) {
-      alert("Please enter or generate a room ID");
-      return;
-    }
+//   const handleJoin = () => {
+//     if (!roomId.trim()) {
+//       alert("Please enter or generate a room ID");
+//       return;
+//     }
 
-    // You can store displayName in Redux or localStorage if needed
-    localStorage.setItem("displayName", displayName);
-    navigate(`/room/${roomId}`);
-  };
+//     // You can store displayName in Redux or localStorage if needed
+//     localStorage.setItem("displayName", displayName);
+//     navigate(`/room/${roomId}`);
+//   };
 
-  const createNewRoom = () => {
-    const newRoomId = uuidv4();
-    setRoomId(newRoomId);
-  };
+//   const createNewRoom = () => {
+//     const newRoomId = uuidv4();
+//     setRoomId(newRoomId);
+//   };
+
+//   return (
+//     <div>
+//       <div className="lobby-container h-fit flex flex-col justify-center items-center text-center gap-1">
+//         <h2 className="text-2xl font-bold mt-2">Video Call Lobby</h2>
+//         {/* <input
+//           type="text"
+//           placeholder="Your name"
+//           value={displayName}
+//           onChange={(e) => setDisplayName(e.target.value)}
+//         />
+//         <input
+//           type="text"
+//           placeholder="Room ID"
+//           value={roomId}
+//           onChange={(e) => setRoomId(e.target.value)}
+//         /> */}
+//         <div className="flex mt-6 gap-8 flex-wrap justify-center">
+//           {" "}
+//           <Link to="/createRoom">
+            
+//             <button
+              
+//               className="btn border-2 text-lg font-semibold rounded-md bg-slate-300 w-40 h-12 flex items-center justify-center text-center hover:bg-slate-500"
+//             >
+//               Create New Room
+//             </button>
+//           </Link>
+//           <Link to="/joinRoom">
+//             <button
+             
+//               className="btn border-2 text-lg  font-semibold rounded-md bg-slate-300 w-40 h-12 flex items-center justify-center text-center hover:bg-slate-500"
+//             >
+//               Join Room
+//             </button>
+//           </Link>
+//         </div>
+//       </div>
+//     </div>
+//   );
+// };
+
+// export default Lobby;
+
+
+import { useState } from "react";
+import { Link, Outlet } from "react-router-dom";
+import { Button } from "./ui/button";
+import { Input } from "./ui/input";
+import { Card, CardContent } from "./ui/card";
+import { Dialog, DialogContent, DialogTrigger } from "./ui/dialog";
+// import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
+
+export default function DashboardPage() {
 
   return (
-    <div className="lobby-container flex flex-col justify-center text-center">
-      <h2>Video Call Lobby</h2>
-      <input
-        type="text"
-        placeholder="Your name"
-        value={displayName}
-        onChange={(e) => setDisplayName(e.target.value)}
-       
-      />
-      <input
-        type="text"
-        placeholder="Room ID"
-        value={roomId}
-        onChange={(e) => setRoomId(e.target.value)}
-        
-      />
-      <button onClick={createNewRoom} className="btn">
-        Create New Room
-      </button>
-      <button onClick={handleJoin} className="btn mt-2">
-        Join Room
-      </button>
+    <div className="flex h-screen bg-gray-100">
+      {/* Sidebar */}
+      <div className="w-64 bg-white shadow-md p-4 flex flex-col gap-6">
+        <div className="flex items-center gap-4">
+          {/* <Avatar>
+            <AvatarImage src="/profile.jpg" alt="User" />
+            <AvatarFallback>U</AvatarFallback>
+          </Avatar> */}
+          <div>
+            <h2 className="text-lg font-semibold">John Doe</h2>
+            <p className="text-sm text-gray-500">@johndoe</p>
+          </div>
+        </div>
+
+        <nav className="flex flex-col gap-4 text-sm">
+          <Button variant="ghost" className="justify-start">
+            My Rooms
+          </Button>
+          <Link to="/createRoom">
+            <Button variant="ghost" className="justify-start w-full">
+              Schedule
+            </Button>
+          </Link>
+          <Button variant="ghost" className="justify-start">
+            Settings
+          </Button>
+        </nav>
+      </div>
+
+      {/* Main Panel */}
+      <div className="flex-1 overflow-y-auto p-6">
+      <Outlet/>
+      </div>
     </div>
   );
-};
-
-export default Lobby;
+}

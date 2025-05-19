@@ -29,7 +29,7 @@ const Login = () => {
       );
       navigate("/");
       console.log(res);
-      dispatch(login(res.data));
+      dispatch(login({ userData: res.data }));
     } catch (error) {
       toast.error(error.response.data.message);
       console.log(error);

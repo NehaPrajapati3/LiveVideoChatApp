@@ -52,85 +52,231 @@
 // }
 
 
+// const usersInRoom = {};
+// const socketToRoom = {};
+
+// export default function socketHandler(io) {
+//   io.on("connection", (socket) => {
+//     console.log("🔌 User connected:", socket.id);
+
+//     socket.on("join-room", ({ roomId, userId }) => {
+//       console.log(`👤 User ${userId} joined room ${roomId}`);
+//       socket.join(roomId);
+//       socketToRoom[socket.id] = roomId;
+
+//       // Store user in room
+//       if (!usersInRoom[roomId]) {
+//         usersInRoom[roomId] = [];
+//       }
+//       usersInRoom[roomId].push({ socketId: socket.id, userId });
+
+//       // Send existing users to the newly joined user
+//       const otherUsers = usersInRoom[roomId].filter(
+//         (u) => u.socketId !== socket.id
+//       );
+//       socket.emit("all-users", otherUsers);
+
+//       // Notify others in the room of the new user
+//       socket.to(roomId).emit("user-joined", {
+//         socketId: socket.id,
+//         userId,
+//       });
+
+//       // Handle signal sent from joining user to others
+//       socket.on("sending-signal", (payload) => {
+//         console.log(`📤 Sending signal from ${socket.id} to ${payload.target}`);
+//         const callerUserId = usersInRoom[roomId]?.find(
+//           (u) => u.socketId === socket.id
+//         )?.userId;
+
+//         io.to(payload.target).emit("user-signal", {
+//           signal: payload.signal,
+//           callerId: socket.id,
+//           callerUserId, // ✅ Send correct user ID of the caller
+//         });
+//       });
+
+//       // Handle signal returned from receiving user
+//       socket.on("returning-signal", (payload) => {
+//         console.log(
+//           `📥 Returning signal from ${socket.id} to ${payload.callerId}`
+//         );
+//         io.to(payload.callerId).emit("receiving-returned-signal", {
+//           signal: payload.signal,
+//           id: socket.id,
+//         });
+//       });
+
+//       // Handle disconnect
+//       socket.on("disconnect", () => {
+//         const roomId = socketToRoom[socket.id];
+//         console.log(`❌ User ${socket.id} disconnected from room ${roomId}`);
+
+//         if (roomId && usersInRoom[roomId]) {
+//           usersInRoom[roomId] = usersInRoom[roomId].filter(
+//             (u) => u.socketId !== socket.id
+//           );
+//           socket.to(roomId).emit("user-left", socket.id);
+
+//           if (usersInRoom[roomId].length === 0) {
+//             delete usersInRoom[roomId];
+//           }
+//         }
+
+//         delete socketToRoom[socket.id];
+//       });
+//     });
+
+//     socket.on("leave-room", ({ roomId, userId }) => {
+//       console.log(`🚪 User ${userId} manually left room ${roomId}`);
+
+//       // Remove user from room
+//       if (usersInRoom[roomId]) {
+//         usersInRoom[roomId] = usersInRoom[roomId].filter(
+//           (u) => u.socketId !== socket.id
+//         );
+//         socket.to(roomId).emit("user-left", socket.id);
+
+//         if (usersInRoom[roomId].length === 0) {
+//           delete usersInRoom[roomId];
+//         }
+//       }
+
+//       delete socketToRoom[socket.id];
+//       socket.leave(roomId);
+//     });
+    
+//   });
+// }
+
 const usersInRoom = {};
 const socketToRoom = {};
+const userToSocket = {}; // userId => socketId
+const pendingUserConfirmations = {}; // userId => [{ newSocketId, roomId }]
 
 export default function socketHandler(io) {
   io.on("connection", (socket) => {
     console.log("🔌 User connected:", socket.id);
 
+    // Handle join-room request
     socket.on("join-room", ({ roomId, userId }) => {
-      console.log(`👤 User ${userId} joined room ${roomId}`);
+      console.log(`👤 User ${userId} attempting to join room ${roomId}`);
+
+      const existingSocketId = userToSocket[userId];
+
+      if (existingSocketId && existingSocketId !== socket.id) {
+        console.log(
+          `⚠️ User ${userId} already has session on socket ${existingSocketId}`
+        );
+
+        // Queue this attempt for later
+        if (!pendingUserConfirmations[userId]) {
+          pendingUserConfirmations[userId] = [];
+        }
+        pendingUserConfirmations[userId].push({
+          newSocketId: socket.id,
+          roomId,
+        });
+
+        console.log(
+          `📨 Sending confirmation request to existing socket ${existingSocketId}`
+        );
+        io.to(existingSocketId).emit("confirm-disconnect", {
+          newSocketId: socket.id,
+          message:
+            "A new login attempt is requesting access. Do you want to allow it?",
+        });
+
+        return; // Wait for confirmation before proceeding
+      }
+
+      // Proceed with joining
+      console.log(
+        `✅ Allowing user ${userId} to join room ${roomId} with socket ${socket.id}`
+      );
+      userToSocket[userId] = socket.id;
       socket.join(roomId);
       socketToRoom[socket.id] = roomId;
 
-      // Store user in room
+      // Add to room users
       if (!usersInRoom[roomId]) {
         usersInRoom[roomId] = [];
       }
       usersInRoom[roomId].push({ socketId: socket.id, userId });
 
-      // Send existing users to the newly joined user
+      // Notify the joining user of others
       const otherUsers = usersInRoom[roomId].filter(
         (u) => u.socketId !== socket.id
       );
       socket.emit("all-users", otherUsers);
 
-      // Notify others in the room of the new user
+      // Notify existing users in room
       socket.to(roomId).emit("user-joined", {
         socketId: socket.id,
         userId,
       });
 
-      // Handle signal sent from joining user to others
-      socket.on("sending-signal", (payload) => {
-        console.log(`📤 Sending signal from ${socket.id} to ${payload.target}`);
-        const callerUserId = usersInRoom[roomId]?.find(
-          (u) => u.socketId === socket.id
-        )?.userId;
+      console.log(`📦 User ${userId} added to usersInRoom[${roomId}]`);
+    });
 
-        io.to(payload.target).emit("user-signal", {
-          signal: payload.signal,
-          callerId: socket.id,
-          callerUserId, // ✅ Send correct user ID of the caller
-        });
-      });
+    // Handle incoming WebRTC signal
+    socket.on("sending-signal", (payload) => {
+      console.log(`📤 Sending signal from ${socket.id} to ${payload.target}`);
+      const roomId = socketToRoom[socket.id];
+      const callerUserId = usersInRoom[roomId]?.find(
+        (u) => u.socketId === socket.id
+      )?.userId;
 
-      // Handle signal returned from receiving user
-      socket.on("returning-signal", (payload) => {
-        console.log(
-          `📥 Returning signal from ${socket.id} to ${payload.callerId}`
-        );
-        io.to(payload.callerId).emit("receiving-returned-signal", {
-          signal: payload.signal,
-          id: socket.id,
-        });
-      });
-
-      // Handle disconnect
-      socket.on("disconnect", () => {
-        const roomId = socketToRoom[socket.id];
-        console.log(`❌ User ${socket.id} disconnected from room ${roomId}`);
-
-        if (roomId && usersInRoom[roomId]) {
-          usersInRoom[roomId] = usersInRoom[roomId].filter(
-            (u) => u.socketId !== socket.id
-          );
-          socket.to(roomId).emit("user-left", socket.id);
-
-          if (usersInRoom[roomId].length === 0) {
-            delete usersInRoom[roomId];
-          }
-        }
-
-        delete socketToRoom[socket.id];
+      io.to(payload.target).emit("user-signal", {
+        signal: payload.signal,
+        callerId: socket.id,
+        callerUserId,
       });
     });
 
+    // Handle return signal
+    socket.on("returning-signal", (payload) => {
+      console.log(
+        `📥 Returning signal from ${socket.id} to ${payload.callerId}`
+      );
+      io.to(payload.callerId).emit("receiving-returned-signal", {
+        signal: payload.signal,
+        id: socket.id,
+      });
+    });
+
+    // Handle disconnect
+    socket.on("disconnect", () => {
+      const roomId = socketToRoom[socket.id];
+      console.log(`❌ User ${socket.id} disconnected from room ${roomId}`);
+
+      if (roomId && usersInRoom[roomId]) {
+        usersInRoom[roomId] = usersInRoom[roomId].filter(
+          (u) => u.socketId !== socket.id
+        );
+        socket.to(roomId).emit("user-left", socket.id);
+
+        if (usersInRoom[roomId].length === 0) {
+          delete usersInRoom[roomId];
+        }
+      }
+
+      // Clean up userToSocket if this was their session
+      const userId = Object.keys(userToSocket).find(
+        (uid) => userToSocket[uid] === socket.id
+      );
+      if (userId) {
+        delete userToSocket[userId];
+        console.log(`🧹 Cleaned up userToSocket for userId ${userId}`);
+      }
+
+      delete socketToRoom[socket.id];
+    });
+
+    // Handle manual leave
     socket.on("leave-room", ({ roomId, userId }) => {
       console.log(`🚪 User ${userId} manually left room ${roomId}`);
 
-      // Remove user from room
       if (usersInRoom[roomId]) {
         usersInRoom[roomId] = usersInRoom[roomId].filter(
           (u) => u.socketId !== socket.id
@@ -143,8 +289,74 @@ export default function socketHandler(io) {
       }
 
       delete socketToRoom[socket.id];
+      delete userToSocket[userId];
       socket.leave(roomId);
     });
-    
+
+    // Handle confirmation response from existing user
+    socket.on("confirm-disconnect-response", ({ accept, newSocketId }) => {
+      const userId = Object.keys(userToSocket).find(
+        (uid) => userToSocket[uid] === socket.id
+      );
+      if (!userId || !pendingUserConfirmations[userId]) return;
+
+      const pending = pendingUserConfirmations[userId].find(
+        (p) => p.newSocketId === newSocketId
+      );
+      if (!pending) return;
+
+      const newSocket = io.sockets.sockets.get(newSocketId);
+
+      if (accept) {
+        console.log(
+          `✅ User ${userId} accepted new session. Disconnecting current socket ${socket.id}`
+        );
+        io.to(socket.id).emit("force-disconnect", {
+          message: "You accepted the new login. Logging out...",
+        });
+        socket.disconnect(true); // Kick the current one
+
+        if (newSocket) {
+          console.log(
+            `➡️ Allowing new socket ${newSocketId} to join room ${pending.roomId}`
+          );
+          userToSocket[userId] = newSocketId;
+          newSocket.join(pending.roomId);
+          socketToRoom[newSocketId] = pending.roomId;
+
+          if (!usersInRoom[pending.roomId]) {
+            usersInRoom[pending.roomId] = [];
+          }
+          usersInRoom[pending.roomId].push({ socketId: newSocketId, userId });
+
+          const others = usersInRoom[pending.roomId].filter(
+            (u) => u.socketId !== newSocketId
+          );
+          newSocket.emit("all-users", others);
+          newSocket.to(pending.roomId).emit("user-joined", {
+            socketId: newSocketId,
+            userId,
+          });
+        }
+      } else {
+        console.log(
+          `⛔ User ${userId} denied new session. Rejecting new socket ${newSocketId}`
+        );
+        if (newSocket) {
+          io.to(newSocketId).emit("force-disconnect", {
+            message: "You are already logged in elsewhere. Session denied.",
+          });
+          newSocket.disconnect(true);
+        }
+      }
+
+      // Cleanup pending confirmation
+      pendingUserConfirmations[userId] = pendingUserConfirmations[
+        userId
+      ].filter((p) => p.newSocketId !== newSocketId);
+    });
   });
 }
+
+
+
