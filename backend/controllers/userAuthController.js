@@ -94,12 +94,8 @@ export const login = async (req, res) => {
         sameSite: "strict",
       })
       .json({
-        userData: {
-          _id: user._id,
-          firstName: user.userInfo?.fullName,
-          lastName: user.userInfo?.username,
-          email: user.userAuth?.email,
-        },
+        status:true,
+        userData: user
       });
   } catch (error) {
     console.log(`Log in user error: ${error}`);
