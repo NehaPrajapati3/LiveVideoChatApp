@@ -4,6 +4,7 @@ import toast from "react-hot-toast";
 import axios from "axios";
 import { useDispatch } from "react-redux";
 import { login } from "../redux/authSlice";
+import useVerifyAuth from "../hooks/useVerifyAuth.jsx";
 
 
 const Login = () => {
@@ -11,6 +12,7 @@ const Login = () => {
     email: "",
     password: "",
   });
+  const [shouldVerify, setShouldVerify] = useState(false);
   const dispatch = useDispatch();
   const navigate = useNavigate();
 
@@ -30,6 +32,7 @@ const Login = () => {
       navigate("/");
       console.log(res);
       dispatch(login({ userData: res.data }));
+      setShouldVerify(true);
     } catch (error) {
       toast.error(error.response.data.message);
       console.log(error);
@@ -39,6 +42,9 @@ const Login = () => {
       password: "",
     });
   };
+  
+  useVerifyAuth(shouldVerify);
+
   return (
     <div className="min-w-full x-auto">
       <div className=" w-200 p-6 rounded-lg shadow-md bg-gray-400 bg-clip-padding backdrop-filter backdrop-blur-md bg-opacity-10 border border-gray-100">
