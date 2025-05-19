@@ -23,37 +23,25 @@ const routes = createBrowserRouter([
     children: [
       {
         path: "/",
-        element: (
-        
-            <MainPanel />
-        
-        ),
+        element: <MainPanel />,
       },
       {
         path: "/createRoom",
-        element: (
-        
-            <CreateRoom />
-        
-        ),
+        element: <CreateRoom />,
       },
       {
         path: "/joinRoom",
-        element: (
-          
-            <JoinRoom />
-          
-        ),
-      },
-      {
-        path: "/room/:roomId",
-        element: (
-          
-            <Room />
-         
-        ),
+        element: <JoinRoom />,
       },
     ],
+  },
+  {
+    path: "/room/:roomId",
+    element: (
+      <AuthLayout>
+        <Room />
+      </AuthLayout>
+    ),
   },
 
   {

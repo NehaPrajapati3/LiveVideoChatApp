@@ -134,14 +134,39 @@
 
 
 import { useState } from "react";
-import { Link, Outlet } from "react-router-dom";
+import { Link, Outlet, useNavigate } from "react-router-dom";
 import { Button } from "./ui/button";
 import { Input } from "./ui/input";
 import { Card, CardContent } from "./ui/card";
 import { Dialog, DialogContent, DialogTrigger } from "./ui/dialog";
+import { useDispatch } from "react-redux";
+import { logout } from "../redux/authSlice";
+import toast from "react-hot-toast";
+import axios from "axios";
 // import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
 
 export default function DashboardPage() {
+  const navigate = useNavigate()
+  const dispatch = useDispatch()
+
+  const handleLogout = async () => {
+    try {
+      //console.log("Inside logout");
+
+      const res = await axios.get(
+        `${process.env.REACT_APP_API_URL}/api/v1/user/logout`
+      );
+      // console.log("Inside logout after res");
+      // console.log(`Res is ${res}`);
+
+      navigate("/login");
+      toast.success(res.data.message);
+      dispatch(logout(null));
+      console.log("user loged out succesfully");
+    } catch (error) {
+      console.log(error);
+    }
+  };
 
   return (
     <div className="flex h-screen bg-gray-100">
@@ -170,12 +195,17 @@ export default function DashboardPage() {
           <Button variant="ghost" className="justify-start">
             Settings
           </Button>
+          
+            <Button variant="ghost" className="justify-start " onClick = {handleLogout}>
+              Logout
+            </Button>
+         
         </nav>
       </div>
 
       {/* Main Panel */}
       <div className="flex-1 overflow-y-auto p-6">
-      <Outlet/>
+        <Outlet />
       </div>
     </div>
   );

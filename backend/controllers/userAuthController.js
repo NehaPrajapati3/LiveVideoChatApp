@@ -85,6 +85,7 @@ export const login = async (req, res) => {
       expiresIn: "1d",
     });
     console.log("token: ", token);
+    console.log("userData:", user)
 
     return res
       .status(200)

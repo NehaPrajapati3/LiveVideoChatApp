@@ -31,7 +31,7 @@ const Login = () => {
       );
       navigate("/");
       console.log(res);
-      dispatch(login({ userData: res.data }));
+      dispatch(login({ userData: res.data.userData }));
       setShouldVerify(true);
     } catch (error) {
       toast.error(error.response.data.message);
