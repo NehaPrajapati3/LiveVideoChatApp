@@ -11,7 +11,7 @@ import Select from "react-select";
 
 export default function ScheduleMeeting() {
   useGetUsers()
-  const users = useSelector((state)=> state.auth.users)
+  const users = useSelector((state) => state.auth.users || []);
   console.log("users:", users)
 
  
