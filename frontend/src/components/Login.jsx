@@ -42,8 +42,9 @@ const Login = () => {
       password: "",
     });
   };
-  
+
   useVerifyAuth(shouldVerify);
+  console.log("Login useverify")
 
   return (
     <div className="min-w-full x-auto">
