@@ -333,15 +333,15 @@ export default function Room() {
             </div>
             <div className="flex-1 h-lvh overflow-y-scroll scrollbar-thin scrollbar-thumb-slate-500 scrollbar-track-slate-800 p-6 bg-slate-500">
               <div className="w-full">
-                {Array.from({ length: 5 }).map((_, i) => (
+                {/* {Array.from({ length: 5 }).map((_, i) => (
                   <div
                     key={i}
                     className="p-2 bg-yellow-300 h-80 m-2 w-1/2 rounded"
                   >
                     Default Item {i + 1}
                   </div>
-                ))}
-                {/* <div className="flex flex-wrap w-full flex-row">
+                ))} */}
+                <div className="flex flex-wrap w-full flex-row">
                 {focusedVideoId !== "local" && localStream && (
                   <div
                     className="p w-1/2 sm:w-1/3 lg:w-1/4 cursor-pointer"
@@ -381,7 +381,7 @@ export default function Room() {
                       />
                     </div>
                   ))}
-              </div> */}
+              </div>
               </div>
             </div>
           </div>
