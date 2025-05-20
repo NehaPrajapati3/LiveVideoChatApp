@@ -270,109 +270,119 @@ export default function Room() {
   
   return (
     <div>
-      <div>
-        <h1 className="ml-2 text-2xl flex justify-center text-center">
-          Room Page
-        </h1>
-        <h2 className="flex justify-center text-center ml-2 text-lg">
-          Room ID: {roomId}
-        </h2>
-      </div>
-
-      <div className="flex flex-wrap">
-        <div className="w-1/2">
-          <div className="flex flex-col w-full cursor-pointer">
-            <h1 className="ml-2 text-lg">Focused Stream</h1>
-            <video
-              ref={focusedVideoElement}
-              muted={focusedVideoId === "local"}
-              autoPlay
-              playsInline
-              className="video"
-            />
-          </div>
-
-          <div className="bg-slate-800 h-16 w-full">
-            <div className="flex p-2 justify-between">
-              <button
-                onClick={toggleMic}
-                disabled={!localStream}
-                className="p-2 rounded-full bg-gray-200 hover:bg-gray-300 disabled:opacity-50"
-              >
-                {micOn ? <Mic size={24} /> : <MicOff size={24} />}
-              </button>
-
-              <button
-                onClick={toggleCamera}
-                disabled={!localStream}
-                className="p-2 rounded-full bg-gray-200 hover:bg-gray-300 disabled:opacity-50"
-              >
-                {cameraOn ? <Video size={24} /> : <VideoOff size={24} />}
-              </button>
-
-              <button
-                onClick={handleLeave}
-                className="p-2 rounded-full bg-red-500 hover:bg-red-600 text-white"
-              >
-                <PhoneOff size={24} />
-              </button>
-
-              <button
-                onClick={() => setChatOpen((prev) => !prev)}
-                className="p-2 rounded-full bg-gray-200 hover:bg-gray-300"
-              >
-                {chatOpen ? (
-                  <MessageSquareDashed size={24} />
-                ) : (
-                  <MessageSquare size={24} />
-                )}
-              </button>
-            </div>
-          </div>
+      <div className="h-full w-full">
+        <div>
+          <h1 className="ml-2 text-2xl flex justify-center text-center">
+            Room Page
+          </h1>
+          <h2 className="flex justify-center text-center ml-2 text-lg">
+            Room ID: {roomId}
+          </h2>
         </div>
+        <div className="flex flex-wrap flex-col ">
+          <div className="flex flex-wrap sm:flex-row">
+            <div className="w-full sm:w-1/2 h-1/2 sm:h-full">
+              <div className="flex flex-col w-full cursor-pointer">
+                <h1 className="ml-2 text-lg">Focused Stream</h1>
+                <video
+                  ref={focusedVideoElement}
+                  muted={focusedVideoId === "local"}
+                  autoPlay
+                  playsInline
+                  className="video"
+                />
+              </div>
 
-        <div className="w-1/2">
-          <div className="flex-1 overflow-y-auto p-6">
-            <div className="flex flex-wrap w-full flex-row">
-              {focusedVideoId !== "local" && localStream && (
-                <div
-                  className="p-2 w-1/4 cursor-pointer"
-                  onClick={() => setFocusedVideoId("local")}
-                >
-                  <p>You</p>
-                  <video
-                    ref={(video) => assignStream(video, localStream)}
-                    muted
-                    autoPlay
-                    playsInline
-                    className="video"
-                  />
-                </div>
-              )}
-
-              {remoteStreams.length === 0 && (
-                <p className="w-full text-center text-gray-400 mt-4">
-                  Waiting for participants...
-                </p>
-              )}
-
-              {remoteStreams
-                .filter(({ peerID }) => peerID !== focusedVideoId)
-                .map(({ peerID, stream }) => (
-                  <div
-                    key={peerID}
-                    className="p-2 w-1/4 cursor-pointer"
-                    onClick={() => setFocusedVideoId(peerID)}
+              <div className="bg-slate-800 h-16 w-full">
+                <div className="flex p-2 justify-between">
+                  <button
+                    onClick={toggleMic}
+                    disabled={!localStream}
+                    className="p-2 rounded-full bg-gray-200 hover:bg-gray-300 disabled:opacity-50"
                   >
-                    <p>Peer ID: {peerID}</p>
+                    {micOn ? <Mic size={24} /> : <MicOff size={24} />}
+                  </button>
+
+                  <button
+                    onClick={toggleCamera}
+                    disabled={!localStream}
+                    className="p-2 rounded-full bg-gray-200 hover:bg-gray-300 disabled:opacity-50"
+                  >
+                    {cameraOn ? <Video size={24} /> : <VideoOff size={24} />}
+                  </button>
+
+                  <button
+                    onClick={handleLeave}
+                    className="p-2 rounded-full bg-red-500 hover:bg-red-600 text-white"
+                  >
+                    <PhoneOff size={24} />
+                  </button>
+
+                  <button
+                    onClick={() => setChatOpen((prev) => !prev)}
+                    className="p-2 rounded-full bg-gray-200 hover:bg-gray-300"
+                  >
+                    {chatOpen ? (
+                      <MessageSquareDashed size={24} />
+                    ) : (
+                      <MessageSquare size={24} />
+                    )}
+                  </button>
+                </div>
+              </div>
+            </div>
+            <div className="flex-1 h-lvh overflow-y-scroll scrollbar-thin scrollbar-thumb-slate-500 scrollbar-track-slate-800 p-6 bg-slate-500">
+              <div className="w-full">
+                {Array.from({ length: 5 }).map((_, i) => (
+                  <div
+                    key={i}
+                    className="p-2 bg-yellow-300 h-80 m-2 w-1/2 rounded"
+                  >
+                    Default Item {i + 1}
+                  </div>
+                ))}
+                {/* <div className="flex flex-wrap w-full flex-row">
+                {focusedVideoId !== "local" && localStream && (
+                  <div
+                    className="p w-1/2 sm:w-1/3 lg:w-1/4 cursor-pointer"
+                    onClick={() => setFocusedVideoId("local")}
+                  >
+                    <p>You</p>
                     <video
-                      ref={(video) => assignStream(video, stream)}
+                      ref={(video) => assignStream(video, localStream)}
+                      muted
                       autoPlay
                       playsInline
                       className="video"
                     />
                   </div>
-                ))}
+                )}
+
+                {remoteStreams.length === 0 && (
+                  <p className="w-full text-center text-gray-400 mt-4">
+                    Waiting for participants...
+                  </p>
+                )}
+
+                {remoteStreams
+                  .filter(({ peerID }) => peerID !== focusedVideoId)
+                  .map(({ peerID, stream }) => (
+                    <div
+                      key={peerID}
+                      className="p-2  w-1/2 sm:w-1/3 lg:w-1/4 cursor-pointer"
+                      onClick={() => setFocusedVideoId(peerID)}
+                    >
+                      <p>Peer ID: {peerID}</p>
+                      <video
+                        ref={(video) => assignStream(video, stream)}
+                        autoPlay
+                        playsInline
+                        className="video"
+                      />
+                    </div>
+                  ))}
+              </div> */}
+              </div>
             </div>
           </div>
         </div>
