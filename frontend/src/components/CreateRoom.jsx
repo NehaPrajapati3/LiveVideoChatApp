@@ -8,6 +8,7 @@ import axios from "axios";
 import useGetUsers from "hooks/useGetUsers";
 import { useSelector } from "react-redux";
 import Select from "react-select";
+import {Link} from "react-router-dom";
 
 export default function ScheduleMeeting() {
   useGetUsers()
@@ -258,7 +259,7 @@ export default function ScheduleMeeting() {
               </div>
             )}
 
-            <div className="md:col-span-2">
+            {/* <div className="md:col-span-2">
               <label className="block text-sm font-medium mb-1">
                 Meeting Type
               </label>
@@ -272,9 +273,9 @@ export default function ScheduleMeeting() {
                 <option value="group">Group</option>
                 <option value="webinar">Webinar</option>
               </select>
-            </div>
+            </div> */}
 
-            <div className="md:col-span-2">
+            {/* <div className="md:col-span-2">
               <label className="block text-sm font-medium mb-1">
                 Room Type
               </label>
@@ -288,11 +289,11 @@ export default function ScheduleMeeting() {
                 <option value="breakout">Breakout</option>
                 <option value="roundtable">Round Table</option>
               </select>
-            </div>
+            </div> */}
           </div>
 
           {/* Advanced Options */}
-          <div>
+          {/* <div>
             <button
               onClick={() => setShowAdvanced(!showAdvanced)}
               className="text-sm text-blue-600 hover:underline"
@@ -358,12 +359,14 @@ export default function ScheduleMeeting() {
                 </div>
               </div>
             )}
-          </div>
+          </div> */}
 
           <div className="flex justify-end gap-3 pt-4 border-t">
-            <Button className="bg-gray-200 text-black hover:bg-gray-300">
-              Cancel
-            </Button>
+            <Link to="/">
+              <Button className="bg-gray-200 text-black hover:bg-gray-300">
+                Cancel
+              </Button>
+            </Link>
             <Button
               className="bg-blue-600 text-white hover:bg-blue-700"
               type="submit"

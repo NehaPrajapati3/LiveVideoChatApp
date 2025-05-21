@@ -22,7 +22,7 @@ function MainPanel() {
       <div className="flex-1 p-6 overflow-auto">
         <div className="flex gap-4 mb-6">
           <Dialog>
-            <DialogTrigger asChild>
+            {/* <DialogTrigger asChild>
               <Button className="bg-blue-600 text-white">
                 + Start Meeting
               </Button>
@@ -33,7 +33,7 @@ function MainPanel() {
               <Button className="w-full bg-blue-600 text-white">
                 Start Now
               </Button>
-            </DialogContent>
+            </DialogContent> */}
           </Dialog>
 
           <div className="flex items-center gap-2">
@@ -43,7 +43,7 @@ function MainPanel() {
               placeholder="Enter Room Code"
               className="w-48"
             />
-            <Link to="/joinRoom">
+            <Link to={`/joinRoom?code=${joinCode}`}>
               <Button className="bg-green-600 text-white">Join Room</Button>
             </Link>
           </div>
@@ -61,7 +61,7 @@ function MainPanel() {
                   <p className="text-sm text-gray-600">
                     {meeting.date} at {meeting.time}
                   </p>
-                  <Link to="/">
+                  <Link to="/joinRoom">
                     <Button variant="outline" className="mt-2">
                       Join
                     </Button>

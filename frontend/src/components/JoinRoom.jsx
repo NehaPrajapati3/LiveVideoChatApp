@@ -2,11 +2,14 @@ import { useState, useRef, useEffect } from "react";
 import { Input } from "./ui/input";
 import { Button } from "./ui/button";
 import { Card } from "./ui/card";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 
 export default function JoinMeeting() {
+  const location = useLocation();
+  const params = new URLSearchParams(location.search);
+  const meetingId = params.get("code");
   const navigate = useNavigate()
-  const [meetingId, setMeetingId] = useState("");
+  // const [meetingId, setMeetingId] = useState("");
   const [displayName, setDisplayName] = useState("");
   const [password, setPassword] = useState("");
   const [cameraEnabled, setCameraEnabled] = useState(true);
@@ -60,7 +63,7 @@ export default function JoinMeeting() {
             </label>
             <Input
               value={meetingId}
-              onChange={(e) => setMeetingId(e.target.value)}
+              // onChange={(e) => setMeetingId(e.target.value)}
               placeholder="e.g. abc123"
             />
           </div>

@@ -1,12 +1,15 @@
 import { useState } from "react";
 import { Button } from "./button";
+import { Input } from "./input"; // Assuming you have an Input component
 
-export function Dialog({ triggerText = "Start New", title, children }) {
+export function Dialog({ title = "Start Meeting", children }) {
   const [open, setOpen] = useState(false);
 
   return (
     <>
-      <Button onClick={() => setOpen(true)}>{triggerText}</Button>
+      <Button onClick={() => setOpen(true)} className="bg-blue-600 text-white">
+        + Start Meeting
+      </Button>
 
       {open && (
         <div className="fixed inset-0 z-50 bg-black bg-opacity-50 flex items-center justify-center">
@@ -20,7 +23,9 @@ export function Dialog({ triggerText = "Start New", title, children }) {
                 ✖
               </button>
             </div>
-            {children}
+
+            <Input placeholder="Meeting Title" className="mb-4" />
+            <Button className="w-full bg-blue-600 text-white">Start Now</Button>
           </div>
         </div>
       )}
@@ -28,27 +33,24 @@ export function Dialog({ triggerText = "Start New", title, children }) {
   );
 }
 
-
-
-
 // export function Dialog({ open, onOpenChange, children }) {
 //   return open ? <>{children}</> : null;
 // }
 
-export function DialogTrigger({ children, onClick }) {
-  return (
-    <button onClick={onClick} className="text-sm text-blue-600 hover:underline">
-      {children}
-    </button>
-  );
-}
+// export function DialogTrigger({ children, onClick }) {
+//   return (
+//     <button onClick={onClick} className="text-sm text-blue-600 hover:underline">
+//       {children}
+//     </button>
+//   );
+// }
 
-export function DialogContent({ children }) {
-  return (
-    <div className="fixed inset-0 z-50 bg-black/50 flex items-center justify-center">
-      <div className="bg-white rounded-lg p-6 w-[90%] max-w-md shadow-lg">
-        {children}
-      </div>
-    </div>
-  );
-}
+// export function DialogContent({ children }) {
+//   return (
+//     <div className="fixed inset-0 z-50 bg-black/50 flex items-center justify-center">
+//       <div className="bg-white rounded-lg p-6 w-[90%] max-w-md shadow-lg">
+//         {children}
+//       </div>
+//     </div>
+//   );
+// }

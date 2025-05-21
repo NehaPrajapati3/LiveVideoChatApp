@@ -219,6 +219,38 @@ export default function socketHandler(io) {
       console.log(`📦 User ${userId} added to usersInRoom[${roomId}]`);
     });
 
+    socket.on("get-users", () => {
+      const roomId = socketToRoom[socket.id];
+      if (!roomId || !usersInRoom[roomId]) return;
+
+      const otherUsers = usersInRoom[roomId].filter(
+        (u) => u.socketId !== socket.id
+      );
+      socket.emit("all-users", otherUsers);
+    });
+
+    socket.on("send-chat-message", ({ from, to, text, timestamp }) => {
+      const roomId = socketToRoom[socket.id];
+      if (!roomId) return;
+
+      const message = { from, to, text, timestamp };
+
+      if (to === "all") {
+        // Broadcast to all except sender
+        socket.to(roomId).emit("chat-message", message);
+      } else {
+        // Private message
+        const targetSocketId = userToSocket[to];
+        if (targetSocketId) {
+          io.to(targetSocketId).emit("chat-message", message);
+        }
+      }
+
+      // Echo back to sender (to show their own message)
+      socket.emit("chat-message", message);
+    });
+
+
     // Handle incoming WebRTC signal
     socket.on("sending-signal", (payload) => {
       console.log(`📤 Sending signal from ${socket.id} to ${payload.target}`);

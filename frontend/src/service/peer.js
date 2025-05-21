@@ -178,6 +178,7 @@ export const useMultiWebRTC = (roomId, userId, navigate) => {
     remoteStreams,
     localStream: localVideoStreamRef.current,
     leaveRoom,
+    socketRef,
   };
 };
 
