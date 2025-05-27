@@ -7,8 +7,8 @@ export const signup = async (req, res) => {
   try {
     console.log("sign up user");
 
-    const { fullName, username, email, password } = req.body;
-    if (!fullName || !username || !email || !password) {
+    const { fullName, username, email, password, role } = req.body;
+    if (!fullName || !username || !email || !password || !role) {
       return res.status(400).json({ message: "All fields are required" });
     }
 
@@ -37,6 +37,7 @@ export const signup = async (req, res) => {
         email,
         password: hashedPassword,
       },
+      role
     });
 
     return res.status(201).json({
@@ -55,14 +56,15 @@ export const signup = async (req, res) => {
 export const login = async (req, res) => {
   try {
     console.log("Log in user");
-    const { email, password } = req.body;
-    if (!email || !password) {
+    const { email, password, role } = req.body;
+    if (!email || !password || !role) {
       return res.status(400).json({ message: "All fields are required" });
     }
 
     const user = await UserAuth.findOne({ "userAuth.email": email }).select(
-      "userAuth.password userInfo"
+      "userAuth userInfo role"
     );
+    console.log("user in login:", user)
     if (!user) {
       return res.status(400).json({
         message: "Incorrect email",
@@ -81,6 +83,13 @@ export const login = async (req, res) => {
       });
     }
 
+    if (role !== user.role) {
+      return res.status(400).json({
+        message: "Account doesn't exist with current role.",
+        success: false,
+      });
+    }
+
     const tokenData = {
       userId: user._id,
     };
@@ -91,21 +100,20 @@ export const login = async (req, res) => {
       expiresIn: "1d",
     });
     console.log("token: ", token);
-    console.log("userData:", user)
+    console.log("userData:", user);
 
     return res
       .status(200)
       .cookie("token", token, {
         maxAge: 1 * 24 * 60 * 60 * 1000,
         httpOnly: true,
-        secure: true, 
-        sameSite: "None", 
+        secure: true,
+        sameSite: "None",
       })
       .json({
         status: true,
         userData: user,
       });
-  
   } catch (error) {
     console.log(`Log in user error: ${error}`);
     return res.status(500).json({

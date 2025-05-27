@@ -5,42 +5,35 @@ import { Card } from "./ui/card";
 import { cn } from "lib/utils";
 import toast from "react-hot-toast";
 import axios from "axios";
-import useGetUsers from "hooks/useGetUsers";
 import { useSelector } from "react-redux";
-import Select from "react-select";
+import {Select, MenuItem} from "@mui/material";
 import {Link} from "react-router-dom";
+import useGetClassroomsByAdminId from "../hooks/useGetClassesByAdminId";
+import { selectClassrooms } from "../redux/selectors";
 
 export default function ScheduleMeeting() {
-  useGetUsers()
-  const users = useSelector((state) => state.auth.users || []);
-  console.log("users:", users)
-
- 
-
-  const userOptions = users.map((user) => ({
-    value: user.userAuth.email,
-    label: `${user.userInfo.fullName} (${user.userAuth.email})`,
-  }));
-
+  useGetClassroomsByAdminId();
+  const classrooms = useSelector(selectClassrooms);
 
   const [form, setForm] = useState({
     title: "",
     date: "",
-    time: "",
+    startTime: "",
+    endTime: "",
     duration: 45,
-    participants: [""],
+    classroom: "",
     isPrivate: false,
     requirePassword: false,
     password: "",
     agenda: "",
-    timezone: "Asia/Kolkata",
-    recordingEnabled: false,
-    allowScreenShare: true,
-    allowChat: true,
-    waitingRoomEnabled: true,
-    notificationsEnabled: true,
-    meetingType: "one-on-one",
-    roomType: "standard",
+    // timezone: "Asia/Kolkata",
+    // recordingEnabled: false,
+    // allowScreenShare: true,
+    // allowChat: true,
+    // waitingRoomEnabled: true,
+    // notificationsEnabled: true,
+    // meetingType: "one-on-one",
+    // roomType: "standard",
   });
 
   const [showAdvanced, setShowAdvanced] = useState(false);
@@ -54,18 +47,18 @@ export default function ScheduleMeeting() {
   };
 
   const handleParticipantChange = (index, value) => {
-    const updated = [...form.participants];
+    const updated = [...form.classrooms];
     updated[index] = value;
-    setForm({ ...form, participants: updated });
+    setForm({ ...form, classrooms: updated });
   };
 
   const addParticipant = () => {
-    setForm({ ...form, participants: [...form.participants, ""] });
+    setForm({ ...form, classrooms: [...form.classrooms, ""] });
   };
 
   const removeParticipant = (index) => {
-    const updated = form.participants.filter((_, i) => i !== index);
-    setForm({ ...form, participants: updated });
+    const updated = form.classrooms.filter((_, i) => i !== index);
+    setForm({ ...form, classrooms: updated });
   };
 
   const handleAdd = async (e) => {
@@ -108,21 +101,22 @@ export default function ScheduleMeeting() {
     setForm({
       title: "",
       date: "",
-      time: "",
+      startTime: "",
+      endTime: "",
       duration: 45,
-      participants: [""],
+      classroom:"",
       isPrivate: false,
       requirePassword: false,
       password: "",
       agenda: "",
-      timezone: "Asia/Kolkata",
-      recordingEnabled: false,
-      allowScreenShare: true,
-      allowChat: true,
-      waitingRoomEnabled: true,
-      notificationsEnabled: true,
-      meetingType: "one-on-one",
-      roomType: "standard",
+      // timezone: "Asia/Kolkata",
+      // recordingEnabled: false,
+      // allowScreenShare: true,
+      // allowChat: true,
+      // waitingRoomEnabled: true,
+      // notificationsEnabled: true,
+      // meetingType: "one-on-one",
+      // roomType: "standard",
     });
 
     
@@ -164,12 +158,37 @@ export default function ScheduleMeeting() {
             </div>
 
             <div>
-              <label className="block text-sm font-medium mb-1">Time</label>
-              <Input
+              <label className="block text-sm font-medium mb-1">
+                Start Time
+              </label>
+              {/* <Input
                 name="time"
                 type="time"
                 value={form.time}
                 onChange={handleChange}
+              /> */}
+              <Input
+                name="startTime"
+                type="datetime-local"
+                value={form.startTime}
+                onChange={handleChange}
+                required
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium mb-1">End Time</label>
+              {/* <Input
+                name="time"
+                type="time"
+                value={form.time}
+                onChange={handleChange}
+              /> */}
+              <Input
+                name="endTime"
+                type="datetime-local"
+                value={form.endTime}
+                onChange={handleChange}
+                required
               />
             </div>
 
@@ -191,24 +210,23 @@ export default function ScheduleMeeting() {
 
             <div className="md:col-span-2">
               <label className="block text-sm font-medium mb-1">
-                Participants
+                Choose ClassRoom
               </label>
               <Select
-                isMulti
-                options={userOptions}
-                value={userOptions.filter((option) =>
-                  form.participants.includes(option.value)
-                )}
-                onChange={(selected) =>
-                  setForm((prev) => ({
-                    ...prev,
-                    participants: selected.map((s) => s.value),
-                  }))
+                value={form.classroom}
+                onChange={(e) =>
+                  setForm({
+                    ...form,
+                    classroom: e.target.value,
+                  })
                 }
-                className="react-select-container"
-                classNamePrefix="react-select"
-                placeholder="Select participants..."
-              />
+              >
+                {classrooms.map((classroom, index) => (
+                  <MenuItem key={index} value={classroom?.title || ""}>
+                    {classroom?.title || "Unnamed"}
+                  </MenuItem>
+                ))}
+              </Select>
             </div>
 
             <div className="md:col-span-2 flex items-center gap-4">

@@ -4,7 +4,7 @@ import { io } from "socket.io-client";
 import Peer from "simple-peer";
 
 export const useMultiWebRTC = (roomId, userId, navigate) => {
-  console.log("iserId in peer.js:", userId);
+  console.log("userId in peer.js:", userId);
   const [peers, setPeers] = useState([]);
   const [remoteStreams, setRemoteStreams] = useState([]);
   const socketRef = useRef();

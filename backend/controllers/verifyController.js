@@ -10,7 +10,7 @@ export const verify = async (req, res) => {
     }
 
    const user = await UserAuth.findById(req.id).select(
-     "userInfo userAuth.email"
+     "userInfo role userAuth.email"
    );
 
     console.log("user", user);

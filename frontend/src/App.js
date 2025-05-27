@@ -7,8 +7,11 @@ import Room from "./components/Room.jsx";
 import MainPanel from "./components/MainPanel";
 import CreateRoom from "./components/CreateRoom.jsx";
 import JoinRoom from "./components/JoinRoom.jsx";
+import JoinClass from "./components/joinClass";
+import AddClass from "./components/AddClass.jsx";
 import AuthLayout from "./hooks/Authlayout.jsx";
 import useVerifyAuth from "./hooks/useVerifyAuth.jsx";
+import MyClasses from "components/MyClasses";
 
 
 
@@ -32,6 +35,18 @@ const routes = createBrowserRouter([
       {
         path: "/joinRoom",
         element: <JoinRoom />,
+      },
+      {
+        path: "/addClass",
+        element: <AddClass />,
+      },
+      {
+        path: "/joinClass",
+        element: <JoinClass />,
+      },
+      {
+        path: "/myClasses",
+        element: <MyClasses />,
       },
     ],
   },

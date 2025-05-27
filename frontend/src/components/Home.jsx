@@ -43,7 +43,7 @@
 //             id="email"
 //             value={email}
 //             onChange={(e) => setEmail(e.target.value)}
-            
+
 //           />
 //           <br />
 //           <label htmlFor="room">Room Number</label>
@@ -62,7 +62,6 @@
 // };
 
 // export default LobbyScreen;
-
 
 // import React, { useState } from "react";
 // import { useNavigate, Link } from "react-router-dom";
@@ -108,9 +107,9 @@
 //         <div className="flex mt-6 gap-8 flex-wrap justify-center">
 //           {" "}
 //           <Link to="/createRoom">
-            
+
 //             <button
-              
+
 //               className="btn border-2 text-lg font-semibold rounded-md bg-slate-300 w-40 h-12 flex items-center justify-center text-center hover:bg-slate-500"
 //             >
 //               Create New Room
@@ -118,7 +117,7 @@
 //           </Link>
 //           <Link to="/joinRoom">
 //             <button
-             
+
 //               className="btn border-2 text-lg  font-semibold rounded-md bg-slate-300 w-40 h-12 flex items-center justify-center text-center hover:bg-slate-500"
 //             >
 //               Join Room
@@ -132,22 +131,23 @@
 
 // export default Lobby;
 
-
 import { useState } from "react";
 import { Link, Outlet, useNavigate } from "react-router-dom";
 import { Button } from "./ui/button";
 import { Input } from "./ui/input";
 import { Card, CardContent } from "./ui/card";
 import { Dialog, DialogContent, DialogTrigger } from "./ui/dialog";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { logout } from "../redux/authSlice";
 import toast from "react-hot-toast";
 import axios from "axios";
 // import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
 
 export default function DashboardPage() {
-  const navigate = useNavigate()
-  const dispatch = useDispatch()
+  const navigate = useNavigate();
+  const dispatch = useDispatch();
+  const { userData } = useSelector((state) => state.auth);
+  console.log("user in home:", userData);
 
   const handleLogout = async () => {
     try {
@@ -178,28 +178,63 @@ export default function DashboardPage() {
             <AvatarFallback>U</AvatarFallback>
           </Avatar> */}
           <div>
-            <h2 className="text-lg font-semibold">John Doe</h2>
-            <p className="text-sm text-gray-500">@johndoe</p>
+            <h2 className="text-lg font-semibold">
+              {userData?.userInfo?.fullName}
+            </h2>
+            <p className="text-sm text-gray-500">{userData?.userAuth?.email}</p>
           </div>
         </div>
 
         <nav className="flex flex-col gap-4 text-sm">
-          <Button variant="ghost" className="justify-start">
-            My Rooms
-          </Button>
-          <Link to="/createRoom">
-            <Button variant="ghost" className="justify-start w-full">
-              Schedule
-            </Button>
-          </Link>
-          <Button variant="ghost" className="justify-start">
-            Settings
-          </Button>
-          
-            <Button variant="ghost" className="justify-start " onClick = {handleLogout}>
-              Logout
-            </Button>
-         
+          {userData && userData.role === "admin" ? (
+            <>
+              <Link to="/addClass">
+                <Button variant="ghost" className="justify-start w-full">
+                  Add Class
+                </Button>
+              </Link>
+              <Link to="/createRoom">
+                <Button variant="ghost" className="justify-start w-full">
+                  Schedule
+                </Button>
+              </Link>
+              <Button variant="ghost" className="justify-start">
+                Settings
+              </Button>
+
+              <Button
+                variant="ghost"
+                className="justify-start "
+                onClick={handleLogout}
+              >
+                Logout
+              </Button>
+            </>
+          ) : (
+            <>
+              <Link to="/joinClass">
+                <Button variant="ghost" className="justify-start w-full">
+                  Join Class
+                </Button>
+              </Link>
+              <Link to="/myClasses">
+                <Button variant="ghost" className="justify-start w-full">
+                  My Classes
+                </Button>
+              </Link>
+              <Button variant="ghost" className="justify-start">
+                Settings
+              </Button>
+
+              <Button
+                variant="ghost"
+                className="justify-start "
+                onClick={handleLogout}
+              >
+                Logout
+              </Button>
+            </>
+          )}
         </nav>
       </div>
 

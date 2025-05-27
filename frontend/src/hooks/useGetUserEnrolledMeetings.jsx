@@ -1,20 +1,20 @@
 import axios from "axios";
 import { useEffect } from "react";
 import { useDispatch } from "react-redux";
-import { setMeetings } from "../redux/meetingSlice";
+import { setUserMeetings } from "../redux/meetingSlice";
 
-function useGetScheduledMeetings() {
+function useGetUserEnrolledMeetings() {
   const dispatch = useDispatch();
   useEffect(() => {
     const fetchScheduledMeetings = async () => {
       try {
         axios.defaults.withCredentials = true;
         const res = await axios.get(
-          `${process.env.REACT_APP_API_URL}/api/v1/meeting/getMeetings`
+          `${process.env.REACT_APP_API_URL}/api/v1/meeting/getUserMeetings`
         );
-       // console.log("Fetched meeting response is", res);
-        dispatch(setMeetings(res.data));
-       // console.log("Dispatched setMeetings with:", res.data);
+        console.log("Fetched meeting response is", res);
+        dispatch(setUserMeetings(res.data.meetings));
+        console.log("Dispatched setUserMeetings with:", res.data);
       } catch (error) {
         console.log(error);
       }
@@ -23,4 +23,4 @@ function useGetScheduledMeetings() {
   }, [dispatch]);
 }
 
-export default useGetScheduledMeetings;
+export default useGetUserEnrolledMeetings;

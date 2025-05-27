@@ -51,21 +51,31 @@ const ChatRoom = ({ socketRef, userId }) => {
 
   return (
     <div>
-      <button
-        // onClick={handleChatToggle}
-        onClick={() => setChatOpen((prev) => !prev)}
-        className="p-2 rounded-full bg-gray-200 hover:bg-gray-300"
-      >
-        {chatOpen ? (
-          <MessageSquareDashed size={24} />
-        ) : (
-          <MessageSquare size={24} />
-        )}
-      </button>
+      <div className="relative inline-block">
+        {/* Toggle Button */}
+        <div className="group inline-block">
+          <button
+            onClick={() => setChatOpen((prev) => !prev)}
+            className="p-2 rounded-full bg-gray-200 hover:bg-gray-300"
+          >
+            {chatOpen ? (
+              <MessageSquareDashed size={24} />
+            ) : (
+              <MessageSquare size={24} />
+            )}
+          </button>
+          <div className="absolute -top-8 left-1/2 -translate-x-1/2 opacity-0 group-hover:opacity-100 transition-opacity bg-black text-white text-xs rounded px-2 py-1 whitespace-nowrap z-10 pointer-events-none">
+            {chatOpen ? "Off Chat" : "On Chat"}
+          </div>
+        </div>
 
-      {chatOpen && (
-        <div className="chat-container border p-2 mt-2 rounded w-80 bg-white shadow-md">
-          <h3>Users in room</h3>
+        {/* Chat Container ABOVE the button */}
+        <div
+          className={`absolute bottom-full mb-2 left-1/2 -translate-x-1/2 z-50 w-80 border p-2 rounded bg-white shadow-md ${
+            chatOpen ? "block" : "hidden"
+          }`}
+        >
+          <h3 className="font-semibold mb-2">Users in room</h3>
           <ul className="user-list mb-2 max-h-32 overflow-y-auto">
             <li
               key="all"
@@ -96,7 +106,7 @@ const ChatRoom = ({ socketRef, userId }) => {
           />
           <ChatInput onSend={sendMessage} />
         </div>
-      )}
+      </div>
     </div>
   );
 };

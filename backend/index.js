@@ -7,6 +7,8 @@ import connectDB from "./config/database.js";
 import verifyRoute from "./routes/verifyRoute.js";
 import userRoute from "./routes/userRoute.js";
 import meetingRoute from "./routes/meetingRoutes.js";
+import classRoute from "./routes/classRoutes.js";
+import conflictRoute from "./routes/conflictRoute.js";
 import {Server} from "socket.io";
 import socketHandler from "./socket.js";
 import path from "path";
@@ -58,6 +60,8 @@ app.use("/uploads", express.static("uploads"));
 app.use("/api/v1/auth", verifyRoute);
 app.use("/api/v1/user", userRoute);
 app.use("/api/v1/meeting", meetingRoute);
+app.use("/api/v1/class", classRoute);
+app.use("/api/v1/conflict", conflictRoute);
 
 
 // const __filename = fileURLToPath(import.meta.url);

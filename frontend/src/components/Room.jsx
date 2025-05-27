@@ -187,6 +187,8 @@ import {
   Video,
   VideoOff,
   PhoneOff,
+  ScreenShareIcon,
+  ScreenShareOffIcon,
   MessageSquare,
   MessageSquareDashed,
 } from "lucide-react";
@@ -268,6 +270,7 @@ export default function Room() {
         track.enabled = !track.enabled;
       });
       setCameraOn((prev) => !prev);
+      console.log("cameraOn:", cameraOn);
     }
   };
 
@@ -486,21 +489,30 @@ export default function Room() {
 
               <div className="bg-slate-800 h-16 w-full">
                 <div className="flex p-2 justify-between">
-                  <button
-                    onClick={toggleMic}
-                    disabled={!localStream}
-                    className="p-2 rounded-full bg-gray-200 hover:bg-gray-300 disabled:opacity-50"
-                  >
-                    {micOn ? <Mic size={24} /> : <MicOff size={24} />}
-                  </button>
-
-                  <button
-                    onClick={toggleCamera}
-                    disabled={!localStream}
-                    className="p-2 rounded-full bg-gray-200 hover:bg-gray-300 disabled:opacity-50"
-                  >
-                    {cameraOn ? <Video size={24} /> : <VideoOff size={24} />}
-                  </button>
+                  <div className="relative group inline-block">
+                    <button
+                      onClick={toggleMic}
+                      disabled={!localStream}
+                      className="p-2 rounded-full bg-gray-200 hover:bg-gray-300 disabled:opacity-50"
+                    >
+                      {micOn ? <Mic size={24} /> : <MicOff size={24} />}
+                    </button>
+                    <div className="absolute bottom-full mb-2 left-1/2 -translate-x-1/2 scale-0 group-hover:scale-100 transition-transform bg-black text-white text-xs rounded px-2 py-1 whitespace-nowrap z-10 pointer-events-none">
+                      {micOn ? "Off Mic" : "On Mic"}
+                    </div>
+                  </div>
+                  <div className="relative group inline-block">
+                    <button
+                      onClick={toggleCamera}
+                      disabled={!localStream}
+                      className="p-2 rounded-full bg-gray-200 hover:bg-gray-300 disabled:opacity-50"
+                    >
+                      {cameraOn ? <Video size={24} /> : <VideoOff size={24} />}
+                    </button>
+                    <div className="absolute bottom-full mb-2 left-1/2 -translate-x-1/2 scale-0 group-hover:scale-100 transition-transform bg-black text-white text-xs rounded px-2 py-1 whitespace-nowrap z-10 pointer-events-none">
+                      {cameraOn ? "Off Camera" : "On Camera"}
+                    </div>
+                  </div>
 
                   <button
                     onClick={handleLeave}
@@ -519,14 +531,28 @@ export default function Room() {
                       <MessageSquare size={24} />
                     )}
                   </button> */}
-                  <ChatRoom socketRef={socketRef} userId={userId} />
-                  <button
-                    onClick={toggleScreenShare}
-                    disabled={!localStream}
-                    className="p-2 rounded-full bg-gray-200 hover:bg-gray-300 disabled:opacity-50"
-                  >
-                    {isScreenSharing ? "Stop Share" : "Share Screen"}
-                  </button>
+                 
+                    <ChatRoom socketRef={socketRef} userId={userId} />
+                   
+                  <div className="relative group inline-block">
+                    <button
+                      onClick={toggleScreenShare}
+                      disabled={!localStream}
+                      className="p-2 rounded-full bg-gray-200 hover:bg-gray-300 disabled:opacity-50"
+                    >
+                      {isScreenSharing ? (
+                        <ScreenShareOffIcon size={24} />
+                      ) : (
+                        <ScreenShareIcon size={24} />
+                      )}
+                    </button>
+
+                    {/* Tooltip */}
+                    <div className="absolute bottom-full mb-2 left-1/2 -translate-x-1/2 scale-0 group-hover:scale-100 transition-transform bg-black text-white text-xs rounded px-2 py-1 whitespace-nowrap z-10 pointer-events-none">
+                      {isScreenSharing ? "Stop Sharing" : "Share Screen"}
+                    </div>
+                  </div>
+
                   {!isRecording ? (
                     <button
                       onClick={startRecording}

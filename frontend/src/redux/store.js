@@ -1,6 +1,8 @@
 import { combineReducers, configureStore } from "@reduxjs/toolkit";
 import authReducer from "./authSlice";
 import meetingReducer from "./meetingSlice";
+import classroomReducer from "./classSlice";
+import conflictNotificationReducer from "./coflictNotificationSlice";
 import {
   persistReducer,
   FLUSH,
@@ -21,6 +23,8 @@ const persistConfig = {
 const rootReducer = combineReducers({
   auth: authReducer,
   meeting: meetingReducer,
+  classroom: classroomReducer,
+  conflictNotification: conflictNotificationReducer,
 });
 
 const persistedReducer = persistReducer(persistConfig, rootReducer);

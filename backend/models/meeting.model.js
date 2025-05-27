@@ -6,26 +6,33 @@ const meetingSchema = new mongoose.Schema(
       type: String,
       required: true,
     },
-    date: {
-      type: String, 
+    startTime: {
+      type: Date,
       required: true,
     },
-    time: {
-      type: String,
+
+    endTime: {
+      type: Date,
       required: true,
     },
+    conflicts: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Conflict",
+      },
+    ],
     duration: {
       type: Number,
       default: 45,
     },
-    participants: {
-      type: [String],
-    //   required: true,
-    //   validate: [
-    //     (array) => array.length > 0,
-    //     "At least one participant is required",
-    //   ],
-    },
+    // participants: {
+    //   type: [String],
+    // //   required: true,
+    // //   validate: [
+    // //     (array) => array.length > 0,
+    // //     "At least one participant is required",
+    // //   ],
+    // },
     isPrivate: {
       type: Boolean,
       default: false,
@@ -44,43 +51,48 @@ const meetingSchema = new mongoose.Schema(
     },
     hostId: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: "UserAuth", 
-    //   required: true,
+      ref: "UserAuth",
+      required: true,
     },
-    timezone: {
-      type: String,
-      default: "Asia/Kolkata",
+    classId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Classroom",
+      required: true,
     },
-    recordingEnabled: {
-      type: Boolean,
-      default: false,
-    },
-    allowScreenShare: {
-      type: Boolean,
-      default: true,
-    },
-    allowChat: {
-      type: Boolean,
-      default: true,
-    },
-    waitingRoomEnabled: {
-      type: Boolean,
-      default: true,
-    },
-    notificationsEnabled: {
-      type: Boolean,
-      default: true,
-    },
-    meetingType: {
-      type: String,
-      enum: ["one-on-one", "group", "webinar"],
-      default: "one-on-one",
-    },
-    roomType: {
-      type: String,
-      enum: ["standard", "breakout", "roundtable"],
-      default: "standard",
-    },
+    // timezone: {
+    //   type: String,
+    //   default: "Asia/Kolkata",
+    // },
+    // recordingEnabled: {
+    //   type: Boolean,
+    //   default: false,
+    // },
+    // allowScreenShare: {
+    //   type: Boolean,
+    //   default: true,
+    // },
+    // allowChat: {
+    //   type: Boolean,
+    //   default: true,
+    // },
+    // waitingRoomEnabled: {
+    //   type: Boolean,
+    //   default: true,
+    // },
+    // notificationsEnabled: {
+    //   type: Boolean,
+    //   default: true,
+    // },
+    // meetingType: {
+    //   type: String,
+    //   enum: ["one-on-one", "group", "webinar"],
+    //   default: "one-on-one",
+    // },
+    // roomType: {
+    //   type: String,
+    //   enum: ["standard", "breakout", "roundtable"],
+    //   default: "standard",
+    // },
   },
   {
     timestamps: true,
