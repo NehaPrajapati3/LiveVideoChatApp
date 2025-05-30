@@ -211,7 +211,7 @@ export default function Room() {
   const { roomId } = useParams();
   const navigate = useNavigate();
   const { localVideoRef, remoteStreams, localStream, leaveRoom, peers, socketRef } =
-    useMultiWebRTC(roomId, userId, navigate);
+    useMultiWebRTC(roomId, userData, navigate);
 
   const [focusedVideoId, setFocusedVideoId] = useState("local");
   const [micOn, setMicOn] = useState(true);
@@ -520,17 +520,6 @@ export default function Room() {
                   >
                     <PhoneOff size={24} />
                   </button>
-
-                  {/* <button
-                    onClick={() => setChatOpen((prev) => !prev)}
-                    className="p-2 rounded-full bg-gray-200 hover:bg-gray-300"
-                  >
-                    {chatOpen ? (
-                      <MessageSquareDashed size={24} />
-                    ) : (
-                      <MessageSquare size={24} />
-                    )}
-                  </button> */}
                  
                     <ChatRoom socketRef={socketRef} userId={userId} />
                    
@@ -606,12 +595,12 @@ export default function Room() {
 
                   {remoteStreams
                     .filter(({ peerID }) => peerID !== focusedVideoId)
-                    .map(({ peerID, stream }) => (
+                    .map(({ peerID, stream, userName}) => (
                       <div
                         key={peerID}
                         className="p-2  w-1/2 sm:w-1/3 lg:w-1/4 cursor-pointer"
                         onClick={() => setFocusedVideoId(peerID)}
-                      >
+                      ><p>username:{userName}</p>
                         <p>Peer ID: {peerID}</p>
                         <video
                           ref={(video) => assignStream(video, stream)}
