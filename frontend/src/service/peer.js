@@ -64,8 +64,8 @@
 //             console.log(
 //               `Created peer for user ${userId} with socket ID ${socketId}`
 //             );
-//             peersRef.current.push({ peerID: socketId, peer });
-//             peerList.push({ peerID: socketId, peer, userId });
+//             peersRef.current.push({  peerID: remoteUserId, peer });
+//             peerList.push({  peerID: remoteUserId, peer, userId });
 //             console.log("👤 Created peer to existing user:", socketId);
 //           });
 //           setPeers(peerList);
@@ -75,8 +75,8 @@
 //           if (peersRef.current.find((p) => p.peerID === socketId)) return;
 
 //           // const peer = addPeer(socketId, stream, null, socketRef.current);
-//           // peersRef.current.push({ peerID: socketId, peer });
-//           // setPeers((users) => [...users, { peerID: socketId, peer, userId }]);
+//           // peersRef.current.push({  peerID: remoteUserId, peer });
+//           // setPeers((users) => [...users, {  peerID: remoteUserId, peer, userId }]);
 //           console.log(`New user joined: ${userId} with socket ID ${socketId}`);
 //         });
 
@@ -311,13 +311,13 @@
 //               peersRef.current.push({
 //                 userId: remoteUserId,
 //                 userName: remoteUserName,
-//                 peerID: socketId,
+//                  peerID: remoteUserId,
 //                 peer,
 //               });
 //               peerList.push({
 //                 userId: remoteUserId,
 //                 userName: remoteUserName,
-//                 peerID: socketId,
+//                  peerID: remoteUserId,
 //                 peer,
 //               });
 //             }
@@ -479,6 +479,7 @@
 //   return peer;
 // }
 
+
 import { useEffect, useRef, useState, useCallback } from "react";
 import { io } from "socket.io-client";
 import Peer from "simple-peer";
@@ -495,15 +496,18 @@ export const useMultiWebRTC = (roomId, userData, navigate) => {
   const localVideoRef = useRef(null);
   const localVideoStreamRef = useRef(null);
 
-  // Stable callback to handle incoming remote streams
+  // Map socketId -> userId and userName for signaling
+  const socketIdToUserId = useRef({});
+  const socketIdToUserName = useRef({});
+
   const handleRemoteStream = useCallback((peerID, stream, userName) => {
     setRemoteStreams((prev) => {
-      const exists = prev.find((r) => r.peerID === peerID);
-      if (exists) {
-        // Replace existing stream for peerID
-        return prev.map((r) => (r.peerID === peerID ? { peerID, stream, userName } : r));
+      const existing = prev.find((r) => r.peerID === peerID);
+      if (existing) {
+        return prev.map((r) =>
+          r.peerID === peerID ? { peerID, stream, userName } : r
+        );
       }
-      // Add new stream
       return [...prev, { peerID, stream, userName }];
     });
   }, []);
@@ -513,7 +517,6 @@ export const useMultiWebRTC = (roomId, userData, navigate) => {
 
     socketRef.current = io(process.env.REACT_APP_API_URL);
 
-    // Force disconnect handling
     socketRef.current.on("confirm-disconnect", ({ newSocketId, message }) => {
       const confirmSwitch = window.confirm(
         message || "Another login is trying to connect. Allow it?"
@@ -531,7 +534,6 @@ export const useMultiWebRTC = (roomId, userData, navigate) => {
       if (navigate) navigate("/");
     });
 
-    // Get user media and join room
     navigator.mediaDevices
       .getUserMedia({ video: true, audio: true })
       .then((stream) => {
@@ -543,80 +545,86 @@ export const useMultiWebRTC = (roomId, userData, navigate) => {
         socketRef.current.emit("join-room", { roomId, userId, userName });
         console.log(`🔗 User ${userName} (${userId}) joined room ${roomId}`);
 
-        // Receive all users currently in the room
+        // All existing users in the room, each with socketId, userId, userName
         socketRef.current.on("all-users", (users) => {
-          peersRef.current = []; // Clear current peers to avoid duplicates
+          peersRef.current = [];
+          socketIdToUserId.current = {};
+          socketIdToUserName.current = {};
+
           const peerList = [];
 
           users.forEach(
             ({ socketId, userId: remoteUserId, userName: remoteUserName }) => {
-              // Skip if peer already exists
-              if (peersRef.current.find((p) => p.userId === remoteUserId))
+              // Map socketId to userId and userName
+              socketIdToUserId.current[socketId] = remoteUserId;
+              socketIdToUserName.current[socketId] = remoteUserName;
+
+              if (peersRef.current.find((p) => p.peerID === remoteUserId))
                 return;
 
               const peer = createPeer(
-                socketId,
-                socketRef.current.id,
+                socketId, // target socketId to signal
+                socketRef.current.id, // your socketId as callerId
                 stream,
                 userId,
                 userName,
                 socketRef.current,
-                handleRemoteStream
+                handleRemoteStream,
+                remoteUserId,
+                remoteUserName
               );
 
-              peersRef.current.push({
+              const peerObj = {
                 userId: remoteUserId,
                 userName: remoteUserName,
-                peerID: socketId,
+                peerID: remoteUserId, // Use userId as peerID
                 peer,
-              });
+              };
 
-              peerList.push({
-                userId: remoteUserId,
-                userName: remoteUserName,
-                peerID: socketId,
-                peer,
-              });
+              peersRef.current.push(peerObj);
+              peerList.push(peerObj);
             }
           );
 
           setPeers(peerList);
         });
 
-        // New user joined (signaling handled in user-signal event)
+        // When a new user joins
         socketRef.current.on(
           "user-joined",
           ({ socketId, userId: remoteUserId, userName: remoteUserName }) => {
-            console.log(
-              `👥 User joined: ${remoteUserName} (${remoteUserId}) [${socketId}]`
-            );
+            socketIdToUserId.current[socketId] = remoteUserId;
+            socketIdToUserName.current[socketId] = remoteUserName;
 
-            // Avoid duplicate peer connections
-            const alreadyConnected = peersRef.current.some(
-              (p) => p.userId === remoteUserId
-            );
-            if (alreadyConnected) {
-              console.warn(
-                `⚠️ Skipping duplicate peer for userId: ${remoteUserId}`
-              );
+            if (peersRef.current.some((p) => p.peerID === remoteUserId)) {
+              console.warn(`⚠️ Duplicate peer skipped for ${remoteUserId}`);
               return;
             }
 
-            // Initiate peer connection
+            const callerSocketId =
+              socketRef.current?.id || socketRef.current?.socket?.id;
+
+            if (!callerSocketId) {
+              console.error("❌ Cannot create peer: socket.id is undefined");
+              return;
+            }
+
             const peer = createPeer(
               socketId,
-              socketRef.current.id,
+              socketRef.current?.id,
               localVideoStreamRef.current,
               userId,
               userName,
               socketRef.current,
-              handleRemoteStream
+              handleRemoteStream,
+              remoteUserId,
+              remoteUserName
             );
 
             const newPeer = {
               userId: remoteUserId,
               userName: remoteUserName,
-              peerID: socketId,
+              peerID: remoteUserId,
               peer,
             };
 
@@ -624,80 +632,81 @@ export const useMultiWebRTC = (roomId, userData, navigate) => {
             setPeers((prev) => [...prev, newPeer]);
           }
         );
-        
 
-        // Incoming signal from a peer who initiated connection
+        // When receiving a signal from someone else
         socketRef.current.on(
           "user-signal",
           ({ callerId, signal, callerUserId, callerUserName }) => {
-            // Remove stale peer if exists
-            const existing = peersRef.current.find(
-              (p) => p.userId === callerUserId
+            const remoteUserId =
+              socketIdToUserId.current[callerId] || callerUserId;
+            const remoteUserName =
+              socketIdToUserName.current[callerId] || callerUserName;
+
+            let existingPeerObj = peersRef.current.find(
+              (p) => p.peerID === remoteUserId
             );
-            if (existing) {
-              console.warn("⚠ Removing stale peer for user:", callerUserId);
-              existing.peer.destroy();
-              peersRef.current = peersRef.current.filter(
-                (p) => p.userId !== callerUserId
+         console.log("existingPeerObj:", existingPeerObj);
+            if (existingPeerObj) {
+              // If peer already exists, just apply the signal to the existing peer connection
+              console.log(
+                `📶 Applying signal to existing peer: ${remoteUserId}`
               );
-              setPeers((prev) => prev.filter((p) => p.userId !== callerUserId));
-            }
+              existingPeerObj.peer.signal(signal);
+            } else {
+              // If it's a new peer, create and add it
+              const peer = addPeer(
+                callerId,
+                localVideoStreamRef.current,
+                signal,
+                socketRef.current,
+                handleRemoteStream,
+                remoteUserId,
+                remoteUserName
+              );
 
-            const peer = addPeer(
-              callerId,
-              localVideoStreamRef.current,
-              signal,
-              socketRef.current,
-              handleRemoteStream,
-              callerUserId,
-              callerUserName
-            );
-            if (!peer) return;
-
-            peersRef.current.push({
-              userId: callerUserId,
-              userName: callerUserName,
-              peerID: callerId,
-              peer,
-            });
-            setPeers((prev) => [
-              ...prev,
-              {
-                userId: callerUserId,
-                userName: callerUserName,
-                peerID: callerId,
+              const newPeer = {
+                userId: remoteUserId,
+                userName: remoteUserName,
+                peerID: remoteUserId,
                 peer,
-              },
-            ]);
+              };
+
+              peersRef.current.push(newPeer);
+              setPeers((prev) => [...prev, newPeer]);
+              console.log(`🆕 New peer added for user: ${remoteUserId}`);
+            }
           }
         );
 
-        // Receiving returned signal after our initiator signal
+        // When receiving returned signal from someone else
         socketRef.current.on("receiving-returned-signal", ({ id, signal }) => {
+          console.log("🛰 receiving-returned-signal for userId:", id);
+          console.log(
+            "📚 peersRef contains:",
+            peersRef.current.map((p) => p.peerID)
+          );
+
           const item = peersRef.current.find((p) => p.peerID === id);
+          console.log("item:", item);
           if (item) {
             item.peer.signal(signal);
             console.log("📶 Signal returned from:", id);
           }
         });
 
-        // User left room event
-        socketRef.current.on(
-          "user-left",
-          ({ socketId, userId: leftUserId }) => {
-            const peerObj = peersRef.current.find(
-              (p) => p.userId === leftUserId
-            );
-            if (peerObj) {
-              peerObj.peer.destroy();
-            }
-            peersRef.current = peersRef.current.filter(
-              (p) => p.userId !== leftUserId
-            );
-            setPeers((prev) => prev.filter((p) => p.userId !== leftUserId));
-            console.log("❌ User left:", leftUserId);
-          }
-        );
+        socketRef.current.on("user-left", ({ userId: leftUserId }) => {
+          const peerObj = peersRef.current.find((p) => p.peerID === leftUserId);
+          if (peerObj) peerObj.peer.destroy();
+
+          peersRef.current = peersRef.current.filter(
+            (p) => p.peerID !== leftUserId
+          );
+          setPeers((prev) => prev.filter((p) => p.peerID !== leftUserId));
+          setRemoteStreams((prev) =>
+            prev.filter((s) => s.peerID !== leftUserId)
+          );
+          console.log("❌ User left:", leftUserId);
+        });
       })
       .catch((err) => {
         console.error("Failed to get user media:", err);
@@ -705,22 +714,14 @@ export const useMultiWebRTC = (roomId, userData, navigate) => {
         if (navigate) navigate("/");
       });
 
-    // Cleanup on unmount
     return () => {
       if (socketRef.current) {
-        socketRef.current.off("confirm-disconnect");
-        socketRef.current.off("force-disconnect");
-        socketRef.current.off("all-users");
-        socketRef.current.off("user-joined");
-        socketRef.current.off("user-signal");
-        socketRef.current.off("receiving-returned-signal");
-        socketRef.current.off("user-left");
+        socketRef.current.disconnect();
       }
       leaveRoom();
     };
   }, [userId, userName, roomId, navigate, handleRemoteStream]);
 
-  // Clean up all peers
   const cleanupAllPeers = () => {
     peersRef.current.forEach(({ peer }) => peer.destroy());
     peersRef.current = [];
@@ -728,7 +729,6 @@ export const useMultiWebRTC = (roomId, userData, navigate) => {
     setRemoteStreams([]);
   };
 
-  // Leave room and disconnect
   const leaveRoom = () => {
     if (socketRef.current && socketRef.current.connected) {
       socketRef.current.emit("leave-room", { roomId, userId });
@@ -750,38 +750,38 @@ export const useMultiWebRTC = (roomId, userData, navigate) => {
   };
 };
 
-// Create a new peer to initiate call
 function createPeer(
-  userToSignal,
-  callerID,
+  userToSignal, // socketId of remote user
+  callerID, // your socketId
   stream,
-  userId,
-  userName,
+  localUserId,
+  localUserName,
   socket,
-  onRemoteStream
+  onRemoteStream,
+  remoteUserId,
+  remoteUserName
 ) {
   const peer = new Peer({ initiator: true, trickle: false, stream });
 
   peer.on("signal", (signal) => {
     socket.emit("sending-signal", {
-      target: userToSignal,
-      callerId: callerID,
+      target: userToSignal, // socketId to send to
+      callerId: callerID, // your socketId
       signal,
-      userId,
-      userName,
+      userId: localUserId,
+      userName: localUserName,
     });
   });
 
   peer.on("stream", (remoteStream) => {
-    onRemoteStream(userToSignal, remoteStream, userName);
+    onRemoteStream(remoteUserId, remoteStream, remoteUserName);
   });
 
   return peer;
 }
 
-// Add a peer who initiated the call
 function addPeer(
-  incomingID,
+  incomingID, // socketId of caller
   stream,
   incomingSignal,
   socket,
@@ -791,21 +791,19 @@ function addPeer(
 ) {
   const peer = new Peer({ initiator: false, trickle: false, stream });
 
-  if (incomingSignal) {
-    peer.signal(incomingSignal);
-  }
+  peer.signal(incomingSignal);
 
   peer.on("signal", (signal) => {
     socket.emit("returning-signal", {
       signal,
-      callerId: incomingID,
+      callerId: incomingID, // socketId of caller
       userId,
       userName,
     });
   });
 
   peer.on("stream", (remoteStream) => {
-    onRemoteStream(incomingID, remoteStream, userName);
+    onRemoteStream(userId, remoteStream, userName);
   });
 
   return peer;
