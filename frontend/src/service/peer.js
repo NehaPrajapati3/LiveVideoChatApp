@@ -641,18 +641,22 @@ export const useMultiWebRTC = (roomId, userData, navigate) => {
               socketIdToUserId.current[callerId] || callerUserId;
             const remoteUserName =
               socketIdToUserName.current[callerId] || callerUserName;
+              console.log(
+                "📚 peersRef contains inside user-signal:",
+                peersRef.current.map((p) => p.peerID)
+              );
 
             let existingPeerObj = peersRef.current.find(
               (p) => p.peerID === remoteUserId
             );
          console.log("existingPeerObj:", existingPeerObj);
-            if (existingPeerObj) {
-              // If peer already exists, just apply the signal to the existing peer connection
-              console.log(
-                `📶 Applying signal to existing peer: ${remoteUserId}`
-              );
-              existingPeerObj.peer.signal(signal);
-            } else {
+            // if (existingPeerObj) {
+            //   // If peer already exists, just apply the signal to the existing peer connection
+            //   console.log(
+            //     `📶 Applying signal to existing peer: ${remoteUserId}`
+            //   );
+            //   existingPeerObj.peer.signal(signal);
+            // } else {
               // If it's a new peer, create and add it
               const peer = addPeer(
                 callerId,
@@ -675,7 +679,7 @@ export const useMultiWebRTC = (roomId, userData, navigate) => {
               setPeers((prev) => [...prev, newPeer]);
               console.log(`🆕 New peer added for user: ${remoteUserId}`);
             }
-          }
+        //  }
         );
 
         // When receiving returned signal from someone else
