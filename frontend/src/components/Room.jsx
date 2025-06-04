@@ -211,7 +211,7 @@ export default function Room() {
   const { roomId } = useParams();
   const navigate = useNavigate();
   const { localVideoRef, remoteStreams, localStream, leaveRoom, peers, socketRef } =
-    useMultiWebRTC(roomId, userData, navigate);
+    useMultiWebRTC(roomId, userId, navigate);
 
   const [focusedVideoId, setFocusedVideoId] = useState("local");
   const [micOn, setMicOn] = useState(true);
@@ -520,9 +520,9 @@ export default function Room() {
                   >
                     <PhoneOff size={24} />
                   </button>
-                 
-                    <ChatRoom socketRef={socketRef} userId={userId} />
-                   
+
+                  <ChatRoom socketRef={socketRef} userId={userId} />
+
                   <div className="relative group inline-block">
                     <button
                       onClick={toggleScreenShare}
@@ -595,21 +595,25 @@ export default function Room() {
 
                   {remoteStreams
                     .filter(({ peerID }) => peerID !== focusedVideoId)
-                    .map(({ peerID, stream, userName}) => (
-                      <div
-                        key={peerID}
-                        className="p-2  w-1/2 sm:w-1/3 lg:w-1/4 cursor-pointer"
-                        onClick={() => setFocusedVideoId(peerID)}
-                      ><p>username:{userName}</p>
-                        <p>Peer ID: {peerID}</p>
-                        <video
-                          ref={(video) => assignStream(video, stream)}
-                          autoPlay
-                          playsInline
-                          className="video"
-                        />
-                      </div>
-                    ))}
+                    .map(({ peerID, stream, userName }) => {
+                      if (!stream)return null;
+                        
+                     return (
+                          <div
+                            key={peerID}
+                            className="p-2  w-1/2 sm:w-1/3 lg:w-1/4 cursor-pointer"
+                            onClick={() => setFocusedVideoId(peerID)}
+                          >
+                            {/* {<p>username:{userName}</p>} */}
+                            {stream && <p>Peer ID: {peerID}</p>}
+                            <video
+                              ref={(video) => assignStream(video, stream)}
+                              autoPlay
+                              playsInline
+                              className="video"
+                            />
+                          </div>
+                        );})}
                 </div>
               </div>
             </div>
