@@ -524,7 +524,7 @@ export default function socketHandler(io) {
 
     socket.on(
       "sending-signal",
-      ({ signal, target, callerId, userId, userName }) => {
+      ({ target, callerId, signal, userId, userName }) => {
         console.log(`📤 Sending signal from ${socket.id} to ${target}`);
         const callerUserId = socketIdToUserId[socket.id] || userId;
         const callerUserName = socketIdToUserName[socket.id] || userName;

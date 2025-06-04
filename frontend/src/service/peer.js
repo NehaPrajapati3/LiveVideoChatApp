@@ -646,17 +646,25 @@ export const useMultiWebRTC = (roomId, userData, navigate) => {
                 peersRef.current.map((p) => p.peerID)
               );
 
+              // if (remoteUserId === localUserId) {
+              //   console.warn(
+              //     "🚨 Attempted to apply signal to self. Skipping..."
+              //   );
+              //   return;
+              // }
+              
+
             let existingPeerObj = peersRef.current.find(
               (p) => p.peerID === remoteUserId
             );
          console.log("existingPeerObj:", existingPeerObj);
-            // if (existingPeerObj) {
-            //   // If peer already exists, just apply the signal to the existing peer connection
-            //   console.log(
-            //     `📶 Applying signal to existing peer: ${remoteUserId}`
-            //   );
-            //   existingPeerObj.peer.signal(signal);
-            // } else {
+            if (existingPeerObj) {
+              // If peer already exists, just apply the signal to the existing peer connection
+              console.log(
+                `📶 Applying signal to existing peer: ${remoteUserId}`
+              );
+              existingPeerObj.peer.signal(signal);
+            } else {
               // If it's a new peer, create and add it
               const peer = addPeer(
                 callerId,
@@ -679,7 +687,7 @@ export const useMultiWebRTC = (roomId, userData, navigate) => {
               setPeers((prev) => [...prev, newPeer]);
               console.log(`🆕 New peer added for user: ${remoteUserId}`);
             }
-        //  }
+          }
         );
 
         // When receiving returned signal from someone else
@@ -778,6 +786,12 @@ function createPeer(
   });
 
   peer.on("stream", (remoteStream) => {
+    console.log(
+      "📥 Received remote stream inside CreatePeer for",
+      remoteUserId,
+      remoteStream,
+      remoteUserName
+    );
     onRemoteStream(remoteUserId, remoteStream, remoteUserName);
   });
 
@@ -807,6 +821,12 @@ function addPeer(
   });
 
   peer.on("stream", (remoteStream) => {
+    console.log(
+      "📥 Received remote stream inside AddPeer for",
+      userId,
+      remoteStream,
+      userName
+    );
     onRemoteStream(userId, remoteStream, userName);
   });
 
