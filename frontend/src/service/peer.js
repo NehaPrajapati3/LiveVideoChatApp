@@ -286,8 +286,10 @@ export const useMultiWebRTC = (roomId, userId, navigate) => {
         localVideoRef.current.srcObject = stream;
         localVideoStreamRef.current = stream;
 
-        socketRef.current.emit("join-room", { roomId, userId });
-        console.log(`🔗 User ${userId} joined room ${roomId}`);
+        
+          socketRef.current.emit("join-room", { roomId, userId });
+          console.log(`🔗 User ${userId} joined room ${roomId}`);
+    
 
         socketRef.current.on("all-users", (users) => {
           const peerList = [];
