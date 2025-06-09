@@ -211,7 +211,7 @@ export default function Room() {
   const { roomId } = useParams();
   const navigate = useNavigate();
   const { localVideoRef, remoteStreams, localStream, leaveRoom, peers, socketRef } =
-    useMultiWebRTC(roomId, userId, navigate);
+    useMultiWebRTC(roomId, userData, navigate);
 
   const [focusedVideoId, setFocusedVideoId] = useState("local");
   const [micOn, setMicOn] = useState(true);
@@ -604,7 +604,7 @@ export default function Room() {
                             className="p-2  w-1/2 sm:w-1/3 lg:w-1/4 cursor-pointer"
                             onClick={() => setFocusedVideoId(peerID)}
                           >
-                            {/* {<p>username:{userName}</p>} */}
+                            {<p>username:{userName}</p>}
                             {stream && <p>Peer ID: {peerID}</p>}
                             <video
                               ref={(video) => assignStream(video, stream)}
