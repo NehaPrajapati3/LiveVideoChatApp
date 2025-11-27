@@ -151,7 +151,7 @@ function MainPanel() {
                         </Button>
                       )}
 
-                      <Link to={`/joinRoom?code=${joinCode}`}>
+                      <Link to={`/joinRoom?code=${meeting._id}`}>
                         <Button variant="outline" className="mt-2 ml-2">
                           Join
                         </Button>
