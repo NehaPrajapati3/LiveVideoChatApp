@@ -3,11 +3,15 @@ import { Input } from "./ui/input";
 import { Button } from "./ui/button";
 import { Card } from "./ui/card";
 import { useNavigate, useLocation } from "react-router-dom";
+import axios from "axios";
 
 export default function JoinMeeting() {
   const location = useLocation();
   const params = new URLSearchParams(location.search);
+  console.log("Params in joinRoom:", params);
+  
   const meetingId = params.get("code");
+  console.log("meetingId in joinRoom:", meetingId);
   const navigate = useNavigate()
   // const [meetingId, setMeetingId] = useState("");
   const [displayName, setDisplayName] = useState("");
@@ -16,6 +20,29 @@ export default function JoinMeeting() {
   const [microphoneEnabled, setMicrophoneEnabled] = useState(true);
 
   const videoRef = useRef(null);
+  const [joinCode, setJoinCode] = useState("");
+
+  // Fetch Join Code from backend
+  const fetchJoinCode = async () => {
+    try {
+      const res = await axios.get(
+        `${process.env.REACT_APP_API_URL}/api/v1/meeting/getJoinCode/${joinCode}`,
+        { withCredentials: true }
+      );
+      console.log("Res in joinRoom:", res)
+
+      // if (res.data?.meeting) {
+      //   setJoinCode(res.data.meeting); // Auto-fill input
+      // }
+    } catch (err) {
+      console.error("Failed to fetch join code", err);
+    }
+  };
+
+  useEffect(() => {
+    fetchJoinCode();
+  }, []);
+
 
   useEffect(() => {
     if (cameraEnabled && videoRef.current) {

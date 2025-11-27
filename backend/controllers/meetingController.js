@@ -1,12 +1,22 @@
+import { console } from "inspector";
 import { Classroom } from "../models/class.model.js";
 import Meeting from "../models/meeting.model.js";
 import {Conflict} from "../models/meetingConflict.model.js";
+import crypto from "crypto";
 
 
 // Create a new meeting
 export const createMeeting = async (req, res) => {
   try {
-    const meetingData = req.body;
+     const meetingId = crypto.randomBytes(6).toString("hex");
+
+     const meetingLink = `${process.env.CLIENT_ORIGIN}/meeting/${meetingId}`;
+
+    const meetingData = {
+      ...req.body,
+      meetingId,
+      meetingLink,
+    };
     const {
       classroom: classroomTitle,
       startTime,
@@ -135,3 +145,32 @@ export const getUserMeetings = async (req, res) => {
       .json({ success: false, message: "Failed to fetch meetings." });
   }
 };
+
+export const getMeetingViaLink = async (req, res) => {
+    console.log("meetingId in getMeetingViaLink:");
+  try {
+    const meetingId = req.params.id;
+    console.log("meetingId in getMeetingViaLink:", meetingId);
+
+    const meeting = await Meeting.findOne({ meetingId });
+
+    if (!meeting) {
+      return res.status(404).json({
+        success: false,
+        message: "Meeting not found",
+      });
+    }
+
+    res.status(200).json({
+      success: true,
+      meeting
+    });
+  } catch (error) {
+    console.error("Error fetching meeting:", error);
+    res.status(500).json({
+      success: false,
+      message: "Error fetching meeting",
+    });
+  }
+
+}

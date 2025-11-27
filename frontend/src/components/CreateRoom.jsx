@@ -14,6 +14,8 @@ import { selectClassrooms } from "../redux/selectors";
 export default function ScheduleMeeting() {
   useGetClassroomsByAdminId();
   const classrooms = useSelector(selectClassrooms);
+  const [meetingLink, setMeetingLink] = useState("");
+
 
   const [form, setForm] = useState({
     title: "",
@@ -91,6 +93,8 @@ export default function ScheduleMeeting() {
 
       if (res.data.success) {
         toast.success(res.data.message);
+       setMeetingLink(res.data.savedMeeting.meetingLink);
+
       }
     } catch (error) {
       toast.error(error?.response?.data?.message || "Something went wrong!");
@@ -103,12 +107,12 @@ export default function ScheduleMeeting() {
       date: "",
       startTime: "",
       endTime: "",
-      duration: 45,
-      classroom:"",
+      classroom: "",
       isPrivate: false,
       requirePassword: false,
       password: "",
       agenda: "",
+      
       // timezone: "Asia/Kolkata",
       // recordingEnabled: false,
       // allowScreenShare: true,
@@ -137,7 +141,7 @@ export default function ScheduleMeeting() {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
               <label className="block text-sm font-medium mb-1">
-                Meeting Title
+                Meeting Title*
               </label>
               <Input
                 name="title"
@@ -147,7 +151,7 @@ export default function ScheduleMeeting() {
               />
             </div>
 
-            <div>
+            {/* <div>
               <label className="block text-sm font-medium mb-1">Date</label>
               <Input
                 name="date"
@@ -155,11 +159,11 @@ export default function ScheduleMeeting() {
                 value={form.date}
                 onChange={handleChange}
               />
-            </div>
+            </div> */}
 
             <div>
               <label className="block text-sm font-medium mb-1">
-                Start Time
+                Start Time*
               </label>
               {/* <Input
                 name="time"
@@ -193,26 +197,11 @@ export default function ScheduleMeeting() {
             </div>
 
             <div>
-              <label className="block text-sm font-medium mb-1">Duration</label>
-              <select
-                name="duration"
-                value={form.duration}
-                onChange={handleChange}
-                className="w-full h-10 rounded-md border border-gray-300 text-sm px-3"
-              >
-                <option value={15}>15 min</option>
-                <option value={30}>30 min</option>
-                <option value={45}>45 min</option>
-                <option value={60}>60 min</option>
-                <option value={90}>90 min</option>
-              </select>
-            </div>
-
-            <div className="md:col-span-2">
               <label className="block text-sm font-medium mb-1">
                 Choose ClassRoom
               </label>
-              <Select
+              <select
+                name="classRoom"
                 value={form.classroom}
                 onChange={(e) =>
                   setForm({
@@ -220,13 +209,18 @@ export default function ScheduleMeeting() {
                     classroom: e.target.value,
                   })
                 }
+                className="w-full h-10 rounded-md border border-gray-300 text-sm px-3"
               >
+                <option></option>
                 {classrooms.map((classroom, index) => (
-                  <MenuItem key={index} value={classroom?.title || ""}>
-                    {classroom?.title || "Unnamed"}
-                  </MenuItem>
+                  <>
+                    
+                    <option key={index} value={classroom?.title || ""}>
+                      {classroom?.title || "Unnamed"}
+                    </option>
+                  </>
                 ))}
-              </Select>
+              </select>
             </div>
 
             <div className="md:col-span-2 flex items-center gap-4">
@@ -393,6 +387,28 @@ export default function ScheduleMeeting() {
             </Button>
           </div>
         </form>
+        {meetingLink && (
+          <div className="md:col-span-2 mt-4">
+            <label className="block text-sm font-medium mb-1">
+              Meeting Link
+            </label>
+
+            <div className="flex items-center gap-2">
+              <Input value={meetingLink} readOnly />
+
+              <Button
+                type="button"
+                onClick={() => {
+                  navigator.clipboard.writeText(meetingLink);
+                  toast.success("Meeting link copied!");
+                }}
+                className="bg-gray-700 text-white"
+              >
+                Copy
+              </Button>
+            </div>
+          </div>
+        )}
       </Card>
     </div>
   );

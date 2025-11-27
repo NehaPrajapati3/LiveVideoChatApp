@@ -59,6 +59,16 @@ const meetingSchema = new mongoose.Schema(
       ref: "Classroom",
       required: true,
     },
+    meetingLink: {
+      type: String,
+      required: true,
+    },
+    meetingId: { 
+      type: String, 
+      required: true, 
+      unique: true
+     },
+
     // timezone: {
     //   type: String,
     //   default: "Asia/Kolkata",

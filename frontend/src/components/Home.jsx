@@ -136,6 +136,7 @@ import { Link, Outlet, useNavigate } from "react-router-dom";
 import { Button } from "./ui/button";
 import { Input } from "./ui/input";
 import { Card, CardContent } from "./ui/card";
+import { Menu } from "lucide-react";
 import { Dialog, DialogContent, DialogTrigger } from "./ui/dialog";
 import { useDispatch, useSelector } from "react-redux";
 import { logout } from "../redux/authSlice";
@@ -148,6 +149,8 @@ export default function DashboardPage() {
   const dispatch = useDispatch();
   const { userData } = useSelector((state) => state.auth);
   console.log("user in home:", userData);
+  const [menuOpen, setMenuOpen] = useState(false);
+
 
   const handleLogout = async () => {
     try {
@@ -162,79 +165,186 @@ export default function DashboardPage() {
       navigate("/login");
       toast.success(res.data.message);
       dispatch(logout(null));
-      console.log("user loged out succesfully");
+      console.log("User loged out succesfully");
     } catch (error) {
       console.log(error);
     }
   };
 
+  // return (
+  //   <div className="flex h-screen bg-gray-100">
+  //     {/* Sidebar */}
+  //     <div className="w-64 bg-gray-400 shadow-md p-4 flex flex-col gap-6">
+  //       <div className="flex items-center gap-4">
+  //         {/* <Avatar>
+  //           <AvatarImage src="/profile.jpg" alt="User" />
+  //           <AvatarFallback>U</AvatarFallback>
+  //         </Avatar> */}
+  //         <div>
+  //           <h2 className="text-lg font-semibold">
+  //             {userData?.userInfo?.fullName}
+  //           </h2>
+  //           <p className="text-sm text-gray-700">{userData?.userAuth?.email}</p>
+  //         </div>
+  //       </div>
+
+  //       <nav className="flex flex-col gap-4 text-sm">
+  //         {userData && userData.role === "admin" ? (
+  //           <>
+  //             <Link to="/">
+  //               <Button variant="ghost" className="justify-start w-full">
+  //                 Main Panel
+  //               </Button>
+  //             </Link>
+  //             <Link to="/addClass">
+  //               <Button variant="ghost" className="justify-start w-full">
+  //                 Add Class
+  //               </Button>
+  //             </Link>
+  //             <Link to="/createRoom">
+  //               <Button variant="ghost" className="justify-start w-full">
+  //                 Schedule
+  //               </Button>
+  //             </Link>
+  //             <Button variant="ghost" className="justify-start">
+  //               Settings
+  //             </Button>
+
+  //             <Button
+  //               variant="ghost"
+  //               className="justify-start "
+  //               onClick={handleLogout}
+  //             >
+  //               Logout
+  //             </Button>
+  //           </>
+  //         ) : (
+  //           <>
+  //             <Link to="/">
+  //               <Button variant="ghost" className="justify-start w-full">
+  //                 Main Panel
+  //               </Button>
+  //             </Link>
+  //             <Link to="/joinClass">
+  //               <Button variant="ghost" className="justify-start w-full">
+  //                 Join Class
+  //               </Button>
+  //             </Link>
+  //             <Link to="/myClasses">
+  //               <Button variant="ghost" className="justify-start w-full">
+  //                 My Classes
+  //               </Button>
+  //             </Link>
+  //             <Button variant="ghost" className="justify-start">
+  //               Settings
+  //             </Button>
+
+  //             <Button
+  //               variant="ghost"
+  //               className="justify-start "
+  //               onClick={handleLogout}
+  //             >
+  //               Logout
+  //             </Button>
+  //           </>
+  //         )}
+  //       </nav>
+
+  //     </div>
+
+  //     {/* Main Panel */}
+  //     <div className="flex-1 overflow-y-auto p-6">
+  //       <Outlet />
+  //     </div>
+  //   </div>
+  // );
+  const NavLinks = () => (
+    <>
+      <Link to="/">
+        <Button variant="ghost" className="justify-start w-full">
+          Main Panel
+        </Button>
+      </Link>
+
+      {userData?.role === "admin" ? (
+        <>
+          <Link to="/addClass">
+            <Button variant="ghost" className="justify-start w-full">
+              Add Class
+            </Button>
+          </Link>
+
+          <Link to="/createRoom">
+            <Button variant="ghost" className="justify-start w-full">
+              Schedule
+            </Button>
+          </Link>
+        </>
+      ) : (
+        <>
+          <Link to="/joinClass">
+            <Button variant="ghost" className="justify-start w-full">
+              Join Class
+            </Button>
+          </Link>
+          <Link to="/myClasses">
+            <Button variant="ghost" className="justify-start w-full">
+              My Classes
+            </Button>
+          </Link>
+        </>
+      )}
+
+      <Button variant="ghost" className="justify-start w-full">
+        Settings
+      </Button>
+
+      <Button
+        variant="ghost"
+        className="justify-start w-full"
+        onClick={handleLogout}
+      >
+        Logout
+      </Button>
+    </>
+  );
+
   return (
     <div className="flex h-screen bg-gray-100">
-      {/* Sidebar */}
-      <div className="w-64 bg-white shadow-md p-4 flex flex-col gap-6">
-        <div className="flex items-center gap-4">
-          {/* <Avatar>
-            <AvatarImage src="/profile.jpg" alt="User" />
-            <AvatarFallback>U</AvatarFallback>
-          </Avatar> */}
-          <div>
-            <h2 className="text-lg font-semibold">
-              {userData?.userInfo?.fullName}
-            </h2>
-            <p className="text-sm text-gray-500">{userData?.userAuth?.email}</p>
-          </div>
+      <div className="lg:hidden absolute top-4 right-4 z-50">
+        <Dialog open={menuOpen} onOpenChange={setMenuOpen}>
+          <DialogTrigger onClick={() => setMenuOpen(true)}>
+            <Button variant="ghost" className="text-3xl">
+              ≡
+            </Button>
+          </DialogTrigger>
+
+          {menuOpen && (
+            <DialogContent>
+              <div className="flex flex-col gap-4">
+                <button
+                  className="w-5"
+                  onClick={() => setMenuOpen(false)}
+                >
+                  ❌
+                </button>
+                <NavLinks />
+              </div>
+            </DialogContent>
+          )}
+        </Dialog>
+      </div>
+
+      <div className="hidden lg:flex w-64 bg-gray-400 shadow-md p-4 flex-col gap-6">
+        <div>
+          <h2 className="text-lg font-semibold">
+            {userData?.userInfo?.fullName}
+          </h2>
+          <p className="text-sm text-gray-700">{userData?.userAuth?.email}</p>
         </div>
 
         <nav className="flex flex-col gap-4 text-sm">
-          {userData && userData.role === "admin" ? (
-            <>
-              <Link to="/addClass">
-                <Button variant="ghost" className="justify-start w-full">
-                  Add Class
-                </Button>
-              </Link>
-              <Link to="/createRoom">
-                <Button variant="ghost" className="justify-start w-full">
-                  Schedule
-                </Button>
-              </Link>
-              <Button variant="ghost" className="justify-start">
-                Settings
-              </Button>
-
-              <Button
-                variant="ghost"
-                className="justify-start "
-                onClick={handleLogout}
-              >
-                Logout
-              </Button>
-            </>
-          ) : (
-            <>
-              <Link to="/joinClass">
-                <Button variant="ghost" className="justify-start w-full">
-                  Join Class
-                </Button>
-              </Link>
-              <Link to="/myClasses">
-                <Button variant="ghost" className="justify-start w-full">
-                  My Classes
-                </Button>
-              </Link>
-              <Button variant="ghost" className="justify-start">
-                Settings
-              </Button>
-
-              <Button
-                variant="ghost"
-                className="justify-start "
-                onClick={handleLogout}
-              >
-                Logout
-              </Button>
-            </>
-          )}
+          <NavLinks />
         </nav>
       </div>
 

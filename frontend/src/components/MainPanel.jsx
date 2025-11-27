@@ -1,5 +1,5 @@
 import React from 'react';
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { Button } from "./ui/button";
 import { Input } from "./ui/input";
@@ -31,8 +31,24 @@ function MainPanel() {
   const conflictNotification = useSelector(selectConflictNotifications);
   console.log("conflictNotification:", conflictNotification);
 
-
     const [joinCode, setJoinCode] = useState("");
+
+    const fetchJoinCode = async (meetingId) => {
+      console.log("meeting._Id in mainPanel:", meetingId);
+      try {
+
+        const res = await axios.get(
+          `${process.env.REACT_APP_API_URL}/api/v1/meeting/${meetingId}`,
+          { withCredentials: true }
+        );
+
+        console.log("Meeting:", res.data._id);
+      } catch (err) {
+        console.error("Failed to fetch join code", err);
+      }
+    };
+
+
 
     const sendConflictMessage = async (
       hostId,
@@ -67,7 +83,7 @@ function MainPanel() {
   return (
     <div>
       <div className="flex-1 p-6 overflow-auto">
-        <div className="flex gap-4 mb-6">
+        {/* <div className="flex gap-4 mb-6">
           <Dialog></Dialog>
 
           <div className="flex items-center gap-2">
@@ -81,7 +97,7 @@ function MainPanel() {
               <Button className="bg-green-600 text-white">Join Room</Button>
             </Link>
           </div>
-        </div>
+        </div> */}
 
         <div>
           <h3 className="text-xl font-semibold mb-4">Upcoming Meetings</h3>
@@ -98,8 +114,12 @@ function MainPanel() {
                         {new Date(meeting.startTime).toLocaleTimeString()}
                       </p>
 
-                      <Link to="/joinRoom">
-                        <Button variant="outline" className="mt-2">
+                      <Link to={`/joinRoom?code=${meeting._id}`}>
+                        <Button
+                          // onClick={() => fetchJoinCode(meeting._id)}
+                          variant="outline"
+                          className="mt-2"
+                        >
                           Join
                         </Button>
                       </Link>
@@ -131,7 +151,7 @@ function MainPanel() {
                         </Button>
                       )}
 
-                      <Link to="/joinRoom">
+                      <Link to={`/joinRoom?code=${joinCode}`}>
                         <Button variant="outline" className="mt-2 ml-2">
                           Join
                         </Button>

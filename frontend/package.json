@@ -26,6 +26,7 @@
     "react-scripts": "5.0.1",
     "react-select": "^5.10.1",
     "redux-persist": "^6.0.0",
+    "shadcn": "^3.5.0",
     "simple-peer": "^9.11.1",
     "socket.io-client": "^4.8.1",
     "tailwind-scrollbar": "^3.0.0",
