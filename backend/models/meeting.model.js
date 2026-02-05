@@ -69,40 +69,7 @@ const meetingSchema = new mongoose.Schema(
       unique: true
      },
 
-    // timezone: {
-    //   type: String,
-    //   default: "Asia/Kolkata",
-    // },
-    // recordingEnabled: {
-    //   type: Boolean,
-    //   default: false,
-    // },
-    // allowScreenShare: {
-    //   type: Boolean,
-    //   default: true,
-    // },
-    // allowChat: {
-    //   type: Boolean,
-    //   default: true,
-    // },
-    // waitingRoomEnabled: {
-    //   type: Boolean,
-    //   default: true,
-    // },
-    // notificationsEnabled: {
-    //   type: Boolean,
-    //   default: true,
-    // },
-    // meetingType: {
-    //   type: String,
-    //   enum: ["one-on-one", "group", "webinar"],
-    //   default: "one-on-one",
-    // },
-    // roomType: {
-    //   type: String,
-    //   enum: ["standard", "breakout", "roundtable"],
-    //   default: "standard",
-    // },
+    
   },
   {
     timestamps: true,

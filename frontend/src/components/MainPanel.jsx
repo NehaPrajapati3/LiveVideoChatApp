@@ -107,14 +107,14 @@ function MainPanel() {
                   <Card key={index} className="shadow-sm">
                     <CardContent className="p-4">
                       <h4 className="font-medium text-lg">
-                        Team Sync #{meeting.title}
+                        Title: {meeting.title}
                       </h4>
                       <p className="text-sm text-gray-600">
                         on {new Date(meeting.startTime).toLocaleDateString()} at{" "}
                         {new Date(meeting.startTime).toLocaleTimeString()}
                       </p>
 
-                      <Link to={`/joinRoom?code=${meeting._id}`}>
+                      <Link to={`/joinRoom?code=${meeting.meetingId}`}>
                         <Button
                           // onClick={() => fetchJoinCode(meeting._id)}
                           variant="outline"
@@ -129,11 +129,22 @@ function MainPanel() {
               : userMeetings.map((meeting, index) => (
                   <Card key={index} className="shadow-sm">
                     <CardContent className="p-4">
-                      <h4 className="font-medium text-lg">{meeting.title}</h4>
+                      <h4 className="font-medium text-lg">
+                        Class Name: {meeting.classId?.title}
+                      </h4>
+                      <h4 className="font-medium text-lg">
+                        Meeting Title: {meeting.title}
+                      </h4>
 
                       <p className="text-sm text-gray-600">
-                        on {new Date(meeting.startTime).toLocaleDateString()} at{" "}
-                        {new Date(meeting.startTime).toLocaleTimeString()}
+                        by{" "}
+                        <span className="font-medium">
+                          {meeting.hostId?.userInfo?.fullName}
+                        </span>{" "}
+                      </p>
+                      <p>
+                        ({new Date(meeting.startTime).toLocaleDateString()}{" "}
+                        {new Date(meeting.startTime).toLocaleTimeString()})
                       </p>
                       {meeting.conflicts && meeting.conflicts.length > 0 && (
                         <Button
@@ -143,7 +154,7 @@ function MainPanel() {
                             sendConflictMessage(
                               meeting.hostId,
                               meeting.classId,
-                              meeting.startTime
+                              meeting.startTime,
                             )
                           }
                         >
@@ -151,19 +162,13 @@ function MainPanel() {
                         </Button>
                       )}
 
-                      <Link to={`/joinRoom?code=${meeting._id}`}>
+                      <Link to={`/joinRoom?code=${meeting.meetingId}`}>
                         <Button variant="outline" className="mt-2 ml-2">
                           Join
                         </Button>
                       </Link>
 
                       <div key={meeting._id} className="mt-2">
-                        <p>
-                          {meeting.title} (
-                          {new Date(meeting.startTime).toLocaleDateString()}{" "}
-                          {new Date(meeting.startTime).toLocaleTimeString()})
-                        </p>
-
                         {meeting.conflict && (
                           <Button
                           // onClick={() =>
@@ -188,6 +193,9 @@ function MainPanel() {
             <>
               <h3 className="text-xl font-semibold mb-2 text-red-600">
                 Conflict Notifications
+                <b className="text-gray-500 font-normal text-sm">
+                  (Raised by student, when meeting time confilcts.)
+                </b>
               </h3>
 
               {conflictNotification && conflictNotification.length > 0 ? (
@@ -209,7 +217,7 @@ function MainPanel() {
                         Time:{" "}
                         {notif.meta?.conflictingMeetingTime
                           ? new Date(
-                              notif.meta.conflictingMeetingTime
+                              notif.meta.conflictingMeetingTime,
                             ).toLocaleString()
                           : "Unknown"}
                       </p>

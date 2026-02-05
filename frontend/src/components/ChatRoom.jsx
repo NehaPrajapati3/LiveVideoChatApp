@@ -4,7 +4,9 @@ import {
   MessageSquareDashed,
 } from "lucide-react";
 
-const ChatRoom = ({ socketRef, userId }) => {
+const ChatRoom = ({ socketRef, userId, userName }) => {
+  console.log("userId in chatRoom:", userId);
+  console.log("userName in chatRoom:", userName);
   const [users, setUsers] = useState([]); // list of { socketId, userId }
   const [chatOpen, setChatOpen] = useState(false);
   const [selectedUserId, setSelectedUserId] = useState("all"); // 'all' means group chat
@@ -16,7 +18,7 @@ const ChatRoom = ({ socketRef, userId }) => {
     // Listen for updated user list
     socketRef.current.on("all-users", (usersList) => {
       setUsers(usersList);
-      console.log("usersList:", usersList);
+      console.log("usersList in chatRoom:", usersList);
     });
 
     // Listen for incoming chat messages
@@ -40,7 +42,9 @@ const ChatRoom = ({ socketRef, userId }) => {
 
     const message = {
       from: userId,
-      to: selectedUserId, // 'all' or specific userId
+      to: selectedUserId,
+      fromuserName: fromuserName,
+      touserName:touserName,
       text,
       timestamp: Date.now(),
     };
@@ -111,12 +115,15 @@ const ChatRoom = ({ socketRef, userId }) => {
   );
 };
 
-const ChatMessages = ({ messages, userId, selectedUserId }) => {
+const ChatMessages = ({ messages, userId, userName, selectedUserId }) => {
   // Filter messages to show only relevant chats (private or all)
   const filteredMessages = messages.filter((msg) => {
     if (selectedUserId === "all") {
       return msg.to === "all";
     }
+    console.log("msg:", msg);
+    console.log("msg.to:", msg.to);
+    console.log("msg.userNamw:", msg.userName);
     // show messages either sent or received by selectedUserId and current user
     return (
       (msg.from === selectedUserId && msg.to === userId) ||
@@ -134,7 +141,7 @@ const ChatMessages = ({ messages, userId, selectedUserId }) => {
           }`}
         >
           <span className="font-bold">
-            {msg.from === userId ? "You" : msg.from}
+            {msg.from === userId ? "You" : msg.userName}
           </span>
           : {msg.text}
           <br />

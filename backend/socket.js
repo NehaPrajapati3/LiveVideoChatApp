@@ -509,11 +509,11 @@ export default function socketHandler(io) {
       );
     });
 
-    socket.on("send-chat-message", ({ from, to, text, timestamp }) => {
+    socket.on("send-chat-message", ({ from, to, text, fromuserName, touserName, timestamp }) => {
       const roomId = socketToRoom[socket.id];
       if (!roomId) return;
 
-      const message = { from, to, text, timestamp };
+      const message = { from, to, text, fromuserName, touserName, timestamp };
 
       if (to === "all") {
         socket.to(roomId).emit("chat-message", message);

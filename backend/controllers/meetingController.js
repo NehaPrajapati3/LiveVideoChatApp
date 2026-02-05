@@ -120,23 +120,33 @@ export const getMeetingById = async (req, res) => {
 };
 
 export const getUserMeetings = async (req, res) => {
+  console.log("req.id:", req.id);
   try {
     const userId = req.id;
-
+      console.log("userId:", userId);
     // Find all classrooms this student is in
     const classrooms = await Classroom.find({ participants: userId });
 
     const classroomIds = classrooms.map((cls) => cls._id);
+    console.log("meetings130:");
 
     const meetings = await Meeting.find({ classId: { $in: classroomIds } })
-      .populate("classId")
+      .populate({
+        path: "classId",
+        select: "title", 
+      })
+      .populate({
+        path: "hostId",
+        select: "userInfo role", 
+      })
       .populate({
         path: "conflicts",
         match: { studentId: userId }, // Only show user's own conflicts
         populate: { path: "toAdminId" }, // show admin info
       })
       .sort("startTime");
-  // console.log("meetings:", meetings)
+
+    console.log("meetings:", meetings)
     res.status(200).json({ success: true, meetings });
   } catch (error) {
     console.error("Error fetching user meetings:", error);
