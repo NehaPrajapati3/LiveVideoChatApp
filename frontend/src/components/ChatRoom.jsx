@@ -43,8 +43,8 @@ const ChatRoom = ({ socketRef, userId, userName }) => {
     const message = {
       from: userId,
       to: selectedUserId,
-      fromuserName: fromuserName,
-      touserName:touserName,
+      // fromuserName: fromuserName,
+      // touserName:touserName,
       text,
       timestamp: Date.now(),
     };
