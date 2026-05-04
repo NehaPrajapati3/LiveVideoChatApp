@@ -11,6 +11,8 @@ const ChatRoom = ({ socketRef, userId, userName }) => {
   const [chatOpen, setChatOpen] = useState(false);
   const [selectedUserId, setSelectedUserId] = useState("all"); // 'all' means group chat
   const [messages, setMessages] = useState([]); // { from, to, text, timestamp }
+  console.log("users in chatRoom:", users);
+
 
   useEffect(() => {
     if (!socketRef.current) return;
@@ -43,12 +45,14 @@ const ChatRoom = ({ socketRef, userId, userName }) => {
     const message = {
       from: userId,
       to: selectedUserId,
-      // fromuserName: fromuserName,
-      // touserName:touserName,
+      fromuserName: userName,
+      touserName: selectedUserId?.userName,
       text,
       timestamp: Date.now(),
     };
 
+    console.log("after selectedUserId", selectedUserId);
+    console.log("after selectedUserId?.userName", selectedUserId?.userName);
     socketRef.current.emit("send-chat-message", message);
     // setMessages((prev) => [...prev, message]);
   };
@@ -90,7 +94,7 @@ const ChatRoom = ({ socketRef, userId, userName }) => {
             >
               Chat with All
             </li>
-            {users.map(({ socketId, userId: uId }) => (
+            {users.map(({ socketId, userId: uId, userName }) => (
               <li
                 key={socketId}
                 onClick={() => setSelectedUserId(uId)}
@@ -98,7 +102,7 @@ const ChatRoom = ({ socketRef, userId, userName }) => {
                   selectedUserId === uId ? "bg-blue-200" : ""
                 }`}
               >
-                {uId}
+                {userName}
               </li>
             ))}
           </ul>
@@ -123,7 +127,7 @@ const ChatMessages = ({ messages, userId, userName, selectedUserId }) => {
     }
     console.log("msg:", msg);
     console.log("msg.to:", msg.to);
-    console.log("msg.userNamw:", msg.userName);
+    console.log("msg.fromuserName:", msg.fromuserName);
     // show messages either sent or received by selectedUserId and current user
     return (
       (msg.from === selectedUserId && msg.to === userId) ||
@@ -140,8 +144,8 @@ const ChatMessages = ({ messages, userId, userName, selectedUserId }) => {
             msg.from === userId ? "text-right text-blue-600" : "text-left"
           }`}
         >
-          <span className="font-bold">
-            {msg.from === userId ? "You" : msg.userName}
+          <span className="font-semibold">
+            {msg.from === userId ? "You" : msg.fromuserName}
           </span>
           : {msg.text}
           <br />
